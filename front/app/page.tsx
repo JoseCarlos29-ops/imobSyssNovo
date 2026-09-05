@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function Home() {
   // Estado para o carrossel de fotos (troca a cada 8 segundos)
@@ -93,10 +94,10 @@ export default function Home() {
             <a href="#recursos" style={{ color: "#4a4a4a", textDecoration: "none", fontSize: "0.95rem", fontWeight: 500 }}>Recursos</a>
           </nav>
 
-          {/* Botões Entrar e Área do Cliente */}
+          {/* Botões Entrar */}
           <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
-            <button 
-              onClick={() => alert('Redirecionando para Login...')}
+            <Link 
+              href="/login"
               style={{
                 background: "transparent",
                 border: "1.5px solid #0a0a0a",
@@ -104,26 +105,12 @@ export default function Home() {
                 padding: "0.55rem 1.2rem",
                 borderRadius: "8px",
                 fontWeight: 600,
-                cursor: "pointer"
+                cursor: "pointer",
+                textDecoration: "none"
               }}
             >
               Entrar
-            </button>
-
-            <button 
-              onClick={() => alert('Redirecionando para Área do Cliente...')}
-              style={{
-                background: "#0a0a0a",
-                border: "none",
-                color: "#ffffff",
-                padding: "0.55rem 1.2rem",
-                borderRadius: "8px",
-                fontWeight: 600,
-                cursor: "pointer"
-              }}
-            >
-              Área do Cliente
-            </button>
+            </Link>
           </div>
         </div>
       </header>
