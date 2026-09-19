@@ -1,25 +1,16 @@
-export default function Home(){
-    return (<>
-
-        <div style={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "radial-gradient(circle at center, #ffffff 40%, #f5efe6 80%, #e8dccb 100%)",
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            padding: "2rem",
-            textAlign: "center"
-        }}>
-                
-        <h1 style={{
-            fontSize: "2.8rem",
-            fontWeight: 800,
-            color: "#0a0a0a",
-            letterSpacing: "-0.5px",
-            margin: 0
-        }}>Seu próximo endereço começa aqui. Bem-vindo à imobSyss!</h1>
+export default function Home() {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-160px)] text-center px-4">
+        <div className="max-w-3xl space-y-4">
+          
+          
+          <h1 className="text-4xl md:text-5xl font-extrabold text-black tracking-tight leading-tight">
+            Seu próximo endereço começa aqui. <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-800 via-amber-900 to-stone-900">
+              Bem-vindo à ImobSyss!
+            </span>
+          </h1>
         </div>
-    </>);
-
-}
+      </div>
+    );
+  }
