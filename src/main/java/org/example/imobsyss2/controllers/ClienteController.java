@@ -27,6 +27,16 @@ public class ClienteController {
         return ResponseEntity.ok(clienteRepository.findAll());
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Metodo de consulta de cliente por id", description = "Metodo responsavel em buscar um cliente específico")
+    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id){
+        Cliente clienteBanco = clienteRepository.findById(id).orElse(null);
+        if(clienteBanco != null){
+            return ResponseEntity.ok(clienteBanco);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping
     @Operation(summary = "Metodo de criação de cliente", description = "Metodo responsavel em efetuar a criação de clientes")
     @ResponseStatus(HttpStatus.CREATED)
@@ -61,7 +71,7 @@ public class ClienteController {
                 clienteBanco.setCpf(cliente.getCpf());
                 clienteBanco.setEndereco(cliente.getEndereco());
                 clienteBanco.setEmail(cliente.getEmail());
-                cliente.setTelefone(cliente.getTelefone());
+                clienteBanco.setTelefone(cliente.getTelefone());
                 clienteRepository.save(clienteBanco);
 
 
@@ -88,5 +98,3 @@ public class ClienteController {
 
 
 }
-
-

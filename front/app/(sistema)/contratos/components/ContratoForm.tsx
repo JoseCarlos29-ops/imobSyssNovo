@@ -5,6 +5,12 @@ import { Contrato, ContratoFormProps } from "@/app/types/contrato";
 import Link from "next/link";
 import { useState } from "react";
 
+const timestampParaInputDate = (timestamp: number) => {
+  if (!timestamp) return "";
+  const data = new Date(timestamp);
+  return data.toISOString().split('T')[0];
+}
+
 export default function ContratoForm({ contratoExistente }: ContratoFormProps) {
 
   const router = useRouter()
@@ -17,7 +23,7 @@ export default function ContratoForm({ contratoExistente }: ContratoFormProps) {
 
     if (contratoExistente) {
 
-      var dadosRetorno = await axios.put<number>('http://localhost:8080/contratos/' + contrato.id, contrato);
+      var dadosRetorno = await axios.put<number>('http://localhost:8080/contratos/' + contrato.id + '/atualizarContratos', contrato);
 
       if (dadosRetorno.status == 200) {
 
@@ -57,7 +63,7 @@ export default function ContratoForm({ contratoExistente }: ContratoFormProps) {
       campos === 'tipo' ? valor : valorAnterior.tipo,
       campos === 'valorContrato' ? Number(valor) : valorAnterior.valorContrato,
       campos === 'valorComissao' ? Number(valor) : valorAnterior.valorComissao,
-      campos === 'dataContrato' ? Number(valor) : valorAnterior.dataContrato,
+      campos === 'dataContrato' ? new Date(valor).getTime() : valorAnterior.dataContrato,
       campos === 'statusContrato' ? valor : valorAnterior.statusContrato
 
     ))
@@ -85,16 +91,17 @@ export default function ContratoForm({ contratoExistente }: ContratoFormProps) {
             <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
               Tipo
             </label>
-            <input
-              type="text"
+            <select
               name="tipo"
               required
               onChange={(e) => handlerChange('tipo', e.target.value)}
               value={contrato.tipo}
-              placeholder="Ex: Locação, Venda"
-
               className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
-            />
+            >
+              <option value="" disabled>Selecione o tipo</option>
+              <option value="Locação">Locação</option>
+              <option value="Venda">Venda</option>
+            </select>
           </div>
 
           {/* Grid Valor do Contrato e Valor da Comissão */}
@@ -145,6 +152,7 @@ export default function ContratoForm({ contratoExistente }: ContratoFormProps) {
                 name="dataContrato"
                 required
                 onChange={(e) => handlerChange('dataContrato', e.target.value)}
+                value={timestampParaInputDate(contrato.dataContrato)}
                 className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
               />
             </div>
@@ -161,8 +169,14 @@ export default function ContratoForm({ contratoExistente }: ContratoFormProps) {
                 className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
               >
                 <option value="" disabled>Selecione o status</option>
+                <option value="EM_ELABORACAO">Em elaboração</option>
+                <option value="AGUARDANDO_ASSINATURA">Aguardando assinatura</option>
                 <option value="ATIVO">Ativo</option>
+                <option value="SUSPENSO">Suspenso</option>
+                <option value="INADIMPLENTE">Inadimplente</option>
+                <option value="RENOVADO">Renovado</option>
                 <option value="ENCERRADO">Encerrado</option>
+                <option value="RESCINDIDO">Rescindido</option>
                 <option value="CANCELADO">Cancelado</option>
               </select>
             </div>

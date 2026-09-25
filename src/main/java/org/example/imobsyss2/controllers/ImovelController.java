@@ -30,6 +30,16 @@ public class ImovelController {
         return ResponseEntity.ok(imovelRepository.findAll());
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Metodo de consulta de imóvel por id", description = "Metodo responsavel em buscar um imóvel específico")
+    public ResponseEntity<Imovel> buscarPorId(@PathVariable Long id){
+        Imovel imovelBanco = imovelRepository.findById(id).orElse(null);
+        if(imovelBanco != null){
+            return ResponseEntity.ok(imovelBanco);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping
     @Operation(summary = "Metodo de criação de imóveis", description = "Metodo responsavel em efetuar a criação de imóveis")
     @ResponseStatus(HttpStatus.CREATED)

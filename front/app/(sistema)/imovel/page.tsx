@@ -46,31 +46,20 @@ export default function Imoveis() {
 
   const handleAlterarStatusImovel = async (imovel: Imovel) => {
 
-    const payload = {
-      endereco: imovel.endereco,
-      tipo: imovel.tipo,
-      valor: imovel.valor,
-      area: imovel.area,
-      quartos: imovel.quartos,
-      banheiros: imovel.banheiros,
-      proprietario: imovel.proprietario,
-      status: proximoStatus(imovel.status),
-    };
+    var novoStatus = { statusImovel: proximoStatus(imovel.status) };
 
-    try {
-      var dadosRetorno = await axios.put('http://localhost:8080/imoveis/' + imovel.id + '/atualizarImovel', payload);
+    var dadosRetorno = await
+      axios.patch('http://localhost:8080/imoveis/' + imovel.id + '/statusImovel', novoStatus);
 
-      if (dadosRetorno.status == 200) {
-        alert("Status atualizado com sucesso!");
-      } else {
-        alert(dadosRetorno.data);
-        return;
-      }
+    if (dadosRetorno.status == 200) {
+      alert("Status atualizado com sucesso!");
+    } else {
+      alert(dadosRetorno.data);
 
-      carregarDados();
-    } catch (error) {
-      alert("Erro ao atualizar status!");
+      return;
     }
+
+    carregarDados();
 
   }
 

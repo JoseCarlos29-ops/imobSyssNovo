@@ -13,4 +13,3 @@ export class Contrato{
 export interface ContratoFormProps{
     contratoExistente?:Contrato
 }
-

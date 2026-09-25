@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 
-    @RequestMapping("/contratos")
-    @Tag(name = "Contratos", description = "Grupo de api's responsável por controlar a consulta de contratos")
-    public class ContratoController {
+@RequestMapping("/contratos")
+@Tag(name = "Contratos", description = "Grupo de api's responsável por controlar a consulta de contratos")
+public class ContratoController {
 
     @Autowired
     private ContratoRepository contratoRepository;
@@ -25,6 +25,16 @@ import org.springframework.web.bind.annotation.*;
     public ResponseEntity<?> listarTodos() {
 
         return ResponseEntity.ok(contratoRepository.findAll());
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Metodo de consulta de contrato por id", description = "Metodo responsavel em buscar um contrato específico")
+    public ResponseEntity<Contrato> buscarPorId(@PathVariable Long id) {
+        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
+        if (contratoBanco != null) {
+            return ResponseEntity.ok(contratoBanco);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
@@ -45,7 +55,7 @@ import org.springframework.web.bind.annotation.*;
 
             return ResponseEntity.ok().build();
         }
-       return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}/atualizarContratos")
@@ -55,11 +65,11 @@ import org.springframework.web.bind.annotation.*;
         try {
             Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
             if (contratoBanco != null) {
-                contratoBanco.setTipo(contratoBanco.getTipo());
-                contratoBanco.setStatusContrato(contratoBanco.getStatusContrato());
-                contratoBanco.setDataContrato(contratoBanco.getDataContrato());
-                contratoBanco.setValorContrato(contratoBanco.getValorContrato());
-                contratoBanco.setValorComissao(contratoBanco.getValorComissao());
+                contratoBanco.setTipo(contrato.getTipo());
+                contratoBanco.setStatusContrato(contrato.getStatusContrato());
+                contratoBanco.setDataContrato(contrato.getDataContrato());
+                contratoBanco.setValorContrato(contrato.getValorContrato());
+                contratoBanco.setValorComissao(contrato.getValorComissao());
 
                 contratoRepository.save(contratoBanco);
 
@@ -72,22 +82,18 @@ import org.springframework.web.bind.annotation.*;
         }
     }
 
-        @DeleteMapping("/{id}/excluirContrato")
-        @Operation(summary = "Metodo de exclusão de contrato", description = "Metodo responsavel em efetuar a exclusão de clientes")
-        public ResponseEntity<Void> excluirContrato(@PathVariable Long id){
-            Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
-            if(contratoBanco!= null ){
-                contratoBanco.setStatusContrato(EnumStatusContrato.CANCELADO);
-                contratoRepository.save(contratoBanco);
-                return  ResponseEntity.ok().build();
-            }
-            return  ResponseEntity.notFound().build();
+    @DeleteMapping("/{id}/excluirContrato")
+    @Operation(summary = "Metodo de exclusão de contrato", description = "Metodo responsavel em efetuar a exclusão de clientes")
+    public ResponseEntity<Void> excluirContrato(@PathVariable Long id){
+        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
+        if(contratoBanco!= null ){
+            contratoBanco.setStatusContrato(EnumStatusContrato.CANCELADO);
+            contratoRepository.save(contratoBanco);
+            return  ResponseEntity.ok().build();
         }
-
-
-
+        return  ResponseEntity.notFound().build();
     }
 
 
 
-
+}

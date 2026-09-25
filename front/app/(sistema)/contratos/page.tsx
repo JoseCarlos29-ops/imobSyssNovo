@@ -49,7 +49,7 @@ export default function Contratos() {
     const novoStatus = { statusContrato: proximoStatus(contrato.statusContrato) };
 
     try {
-      var dadosRetorno = await axios.patch('http://localhost:8080/contratos/' + contrato.id + '/statusContrato', novoStatus);
+      var dadosRetorno = await axios.patch('http://localhost:8080/contratos/' + contrato.id + '/AtualizarStatusContrato', novoStatus);
 
       if (dadosRetorno.status == 200) {
         alert("Status atualizado com sucesso!");
