@@ -20,9 +20,63 @@ export default function Imoveis() {
     }
   };
 
+  const handleDeletarImovel = async (imovel: Imovel) => {
+
+    var dadosRetorno = await axios.delete('http://localhost:8080/imoveis/' + imovel.id + '/excluirImovel');
+
+    if (dadosRetorno.status == 200) {
+
+      alert("Imóvel foi deletado com sucesso");
+
+    } else {
+
+      alert(dadosRetorno.data)
+      return;
+    }
+
+    carregarDados();
+
+  }
+
+  const proximoStatus = (statusAtual: string) => {
+    if (statusAtual === "DISPONIVEL") return "ALUGADO";
+    if (statusAtual === "ALUGADO") return "VENDIDO";
+    return "DISPONIVEL";
+  }
+
+  const handleAlterarStatusImovel = async (imovel: Imovel) => {
+
+    const payload = {
+      endereco: imovel.endereco,
+      tipo: imovel.tipo,
+      valor: imovel.valor,
+      area: imovel.area,
+      quartos: imovel.quartos,
+      banheiros: imovel.banheiros,
+      proprietario: imovel.proprietario,
+      status: proximoStatus(imovel.status),
+    };
+
+    try {
+      var dadosRetorno = await axios.put('http://localhost:8080/imoveis/' + imovel.id + '/atualizarImovel', payload);
+
+      if (dadosRetorno.status == 200) {
+        alert("Status atualizado com sucesso!");
+      } else {
+        alert(dadosRetorno.data);
+        return;
+      }
+
+      carregarDados();
+    } catch (error) {
+      alert("Erro ao atualizar status!");
+    }
+
+  }
+
   return (
     <div className="relative min-h-screen w-full bg-stone-100 p-6 md:p-10 font-sans antialiased overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgba(120,53,15,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(69,26,3,0.1),transparent_50%),linear-gradient(to_bottom_right,#fafaf9,#f5f5f4)]">
-      
+
       {/* Detalhes de fundo em tons quentes */}
       <div className="absolute top-10 left-10 w-96 h-96 bg-amber-900/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-950/10 rounded-full blur-3xl pointer-events-none" />
@@ -80,6 +134,9 @@ export default function Imoveis() {
                   <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider">
                     Status
                   </th>
+                  <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider text-right">
+                    Ações
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -117,13 +174,43 @@ export default function Imoveis() {
                         {imovel.status}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-sm text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/imovel/${imovel.id}/editar`}
+                          className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold uppercase tracking-wider rounded-lg border border-stone-200 transition-all duration-200"
+                        >
+                          Editar
+                        </Link>
+
+                        <button
+                          onClick={() => handleAlterarStatusImovel(imovel)}
+                          className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg border transition-all duration-200 ${
+                            imovel.status === 'DISPONIVEL'
+                              ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-100'
+                              : imovel.status === 'ALUGADO'
+                              ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-100'
+                              : 'bg-green-50 hover:bg-green-100 text-green-700 border-green-100'
+                          }`}
+                        >
+                          {imovel.status === 'DISPONIVEL' ? 'Alugar' : imovel.status === 'ALUGADO' ? 'Vender' : 'Reabrir'}
+                        </button>
+
+                        <button
+                          onClick={() => handleDeletarImovel(imovel)}
+                          className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold uppercase tracking-wider rounded-lg border border-red-100 transition-all duration-200"
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
 
                 {imoveis.length === 0 && (
                   <tr>
                     <td
-                      colSpan={9}
+                      colSpan={10}
                       className="px-6 py-16 text-center text-stone-400 text-sm font-light italic"
                     >
                       Nenhum imóvel encontrado!

@@ -10,3 +10,7 @@ export class Cliente{
 
     ){}
 }
+
+export interface ClienteFormProps{
+    clienteExistente?:Cliente
+}

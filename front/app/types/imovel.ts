@@ -13,3 +13,7 @@ export class Imovel{
 
     ){}
 }
+
+export interface ImovelFormProps{
+    imovelExistente?:Imovel
+}

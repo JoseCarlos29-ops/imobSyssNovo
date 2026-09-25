@@ -1,7 +1,76 @@
+'use client'
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { Usuario, UsuarioFormProps } from "@/app/types/usuario";
 import Link from "next/link";
+import { useState } from "react";
 
-export default function UsuarioForm() {
+export default function UsuarioForm({usuarioExistente} : UsuarioFormProps) {
+
+  const router = useRouter()
+
+  const [usuario, setUsuario] = useState<Usuario> (usuarioExistente || new Usuario(null, "", "", "ATIVO", "", "")); 
+
+  
+
+
+const handlerSalvar = async (formData : FormData) => {
+
+  if(usuarioExistente){
+
+    var dadosRetorno = await axios.put<number>( 'http://localhost:8080/usuarios' +usuario.id, usuario);
+
+  if(dadosRetorno.status ==200){
+  
+    alert("Usuario foi salvo com sucesso");
+    
+  }else{
+
+    alert(dadosRetorno.data)
+    return;
+  }
+
+  router.push("/usuarios")
+
+
+
+  }else{
+
+  var dadosRetorno = await axios.post<number>( 'http://localhost:8080/usuarios', usuario);
+
+  if(dadosRetorno.status ==200){
+  
+    alert("Usuario foi salvo com sucesso");
+    
+  }else{
+
+    alert(dadosRetorno.data)
+    return;
+  }
+
+  router.push("/usuarios")
+
+}
+}
+
+  const handlerChange = ( campos: 'nome' | 'email' | 'cpf' | 'senha', valor:string) => {
+    setUsuario(valorAnterior => new Usuario(
+
+      valorAnterior.id,
+      campos === 'nome' ? valor : valorAnterior.nome,
+      campos === 'email' ? valor : valorAnterior.email,
+      valorAnterior.status,
+      campos === 'cpf' ? valor : valorAnterior.cpf,
+      campos === 'senha' ? valor: valorAnterior.senha
+      
+
+    ) )
+  }
+
   return (
+
+  
+
     <div className="max-w-2xl mx-auto">
       {/* Cabeçalho do Formulário */}
       <div className="mb-6">
@@ -14,7 +83,7 @@ export default function UsuarioForm() {
       </div>
 
       {/* Card do Formulário */}
-      <form className="bg-white border border-stone-200/60 rounded-3xl p-6 md:p-8 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.05)]">
+      <form action = {handlerSalvar} className="bg-white border border-stone-200/60 rounded-3xl p-6 md:p-8 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.05)]">
         <div className="space-y-5">
           
           {/* Nome Completo */}
@@ -25,7 +94,11 @@ export default function UsuarioForm() {
             <input
               type="text"
               name="nome"
-              placeholder="Digite o nome completo"
+              required
+              onChange={(e)=> handlerChange('nome', e.target.value)}
+              value = {usuario.nome}
+              placeholder="Nome completo"
+
               className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
             />
           </div>
@@ -39,7 +112,10 @@ export default function UsuarioForm() {
               <input
                 type="text"
                 name="cpf"
-                placeholder="000.000.000-00"
+                required
+                onChange={(e)=> handlerChange('cpf', e.target.value)}
+                value = {usuario.cpf}
+                
                 className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200 font-mono"
               />
             </div>
@@ -51,7 +127,11 @@ export default function UsuarioForm() {
               <input
                 type="email"
                 name="email"
-                placeholder="exemplo@email.com"
+                required
+                onChange={(e)=> handlerChange('email', e.target.value)}
+                value = {usuario.email}
+                placeholder="Email@outlook.com.br"
+                
                 className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
               />
             </div>
@@ -65,7 +145,11 @@ export default function UsuarioForm() {
             <input
               type="password"
               name="senha"
-              placeholder="••••••••"
+              required
+              onChange={(e)=> handlerChange('senha', e.target.value)}
+              value = {usuario.senha}
+              placeholder="*********"
+             
               className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
             />
           </div>
