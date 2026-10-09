@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.imobsyss2.application.dtos.CriarAdminRequest;
 
 @Entity
 @Data
@@ -26,5 +27,21 @@ public class Usuario {
 
     private String email;
 
-    private EnumStatusUsuario status;
+    private String role = "ROLE_USER";
+
+
+    private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
+
+    public Usuario(CriarAdminRequest criarAdminRequest) {
+        this.setCpf(cpf);
+        this.setNome(nome);
+        this.setSenha(senha);
+        this.setEmail(email);
+
+        this.setRole("ROLE_ADMIN");
+    }
+
+
 }
+
+

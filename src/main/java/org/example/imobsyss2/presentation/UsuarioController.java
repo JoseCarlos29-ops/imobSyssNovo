@@ -4,6 +4,8 @@ package org.example.imobsyss2.presentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.imobsyss2.application.dtos.AtualizarStatusRequest;
+import org.example.imobsyss2.application.dtos.CriarAdminRequest;
+import org.example.imobsyss2.application.dtos.CriarAdminResponse;
 import org.example.imobsyss2.application.dtos.UsuarioResponse;
 import org.example.imobsyss2.application.services.UsuarioService;
 import org.example.imobsyss2.domain.entities.EnumStatusUsuario;
@@ -32,7 +34,7 @@ public class UsuarioController {
     @GetMapping
     public ResponseEntity<List<UsuarioResponse>> ListarTodosUsuariosTable(){
 
-        return  ResponseEntity.ok(usuarioService.ListarTodosUsuariosTable());
+        return  ResponseEntity.ok(usuarioService.listarTodosUsuariosTable());
     }
 
     @GetMapping("/{id}")
@@ -42,6 +44,19 @@ public class UsuarioController {
             return ResponseEntity.ok(usuarioBanco);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<CriarAdminResponse> criarAdmin(@RequestBody CriarAdminRequest criarAdminRequest){
+
+        try {
+
+            CriarAdminResponse respostaSalvar = usuarioService.criarAdmin(criarAdminRequest);
+            return ResponseEntity.ok(respostaSalvar);
+        } catch(RuntimeException e){
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 
 

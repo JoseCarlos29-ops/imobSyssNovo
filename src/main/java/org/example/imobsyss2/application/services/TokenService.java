@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import org.example.imobsyss2.application.dtos.LoginRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,46 +16,42 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    @Value("${spring.secret}")
+    @Value("${spring.secretkey}")
     private String secret;
-    @Value("${spring.expiracao}")
-    private Long expiracao;
-    @Value("${spring.emissor}")
-    private String emissor;
 
-    public String gerarToken(String subject){
+    @Value("${spring.tempo_expiracao}")
+    private Long tempo;
 
-        try{
-            Algorithm algorithm = Algorithm.HMAC256(secret);
+    private String emissor = "DEVTEST";
 
-            String token = JWT.create()
-                    .withIssuer(emissor)
-                    .withSubject(subject)
-                    .withExpiresAt(getDataExpiracao())
-                    .sign(algorithm);
 
-            return token;
-
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public DecodedJWT verificarToken(String token)throws JWTVerificationException {
+    public String gerarToken(LoginRequest loginResquestDto){
 
         Algorithm algorithm = Algorithm.HMAC256(secret);
+
+        String token = JWT.create()
+                .withIssuer(emissor)
+                .withSubject(loginResquestDto.email())
+                .withExpiresAt(this.gerarDataExpiracao())
+                .sign(algorithm);
+
+        return token;
+    }
+
+    public DecodedJWT verificarToken(String token) throws JWTVerificationException {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+
         JWTVerifier verificador = JWT.require(algorithm).withIssuer(emissor).build();
+
         return verificador.verify(token);
+
     }
 
-    private Instant getDataExpiracao(){
-
-        //pegar data atual
+    private Instant gerarDataExpiracao(){
         var dataAtual = LocalDateTime.now();
-        //adicionar ou diminuir tempo da data atual
-        var dataFutura = dataAtual.plusMinutes(expiracao);
-        //Converter fuso do Brasil
-        return dataFutura.toInstant(ZoneOffset.of("-03:00"));
-    }
+        dataAtual = dataAtual.plusMinutes(tempo);
 
+        return dataAtual.toInstant(ZoneOffset.of("-03:00"));
+
+    }
 }
