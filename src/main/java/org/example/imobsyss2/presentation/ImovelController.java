@@ -38,6 +38,8 @@ public class ImovelController {
         return ResponseEntity.notFound().build();
     }
 
+
+
     @PostMapping
     @Operation(summary = "Metodo de criação de imóveis", description = "Metodo responsavel em efetuar a criação de imóveis")
     @ResponseStatus(HttpStatus.CREATED)

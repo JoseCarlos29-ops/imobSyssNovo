@@ -10,7 +10,9 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -51,13 +53,13 @@ public class UsuarioController {
         int respostaApi = executaMetodoAPI("http://localhost:8080/usuarios/admin",jsonRequest,"POST");
 
 
-        if(respostaApi ==200){
-            showMessage(Alert.AlertType.INFORMATION,"Usuario salv com sucesso!");
-            voltar(event);
+    if(respostaApi ==200){
+        showMessage(Alert.AlertType.INFORMATION,"Usuario salv com sucesso!");
+        voltar(event);
 
-        }else {
-            showMessage(Alert.AlertType.ERROR,"Erro ao salvar usuário!");
-        }
+    }else {
+        showMessage(Alert.AlertType.ERROR,"Erro ao salvar usuário!");
+    }
 
 
 
@@ -121,7 +123,5 @@ public class UsuarioController {
         alerta.setContentText(msg);
         alerta.showAndWait();
     }
-
-
 
 }
