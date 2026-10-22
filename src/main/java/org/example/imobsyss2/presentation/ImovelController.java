@@ -3,8 +3,9 @@ package org.example.imobsyss2.presentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.imobsyss2.application.dtos.AtualizarStatusImovel;
+import org.example.imobsyss2.application.dtos.ImovelRequest;
+import org.example.imobsyss2.application.dtos.ImovelResponse;
 import org.example.imobsyss2.application.services.ImovelService;
-import org.example.imobsyss2.domain.entities.Imovel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +23,14 @@ public class ImovelController {
 
     @GetMapping
     @Operation(summary = "Metodo de consulta de lista de imoveis", description = "Metodo responsavel em efetuar a consulta de todos os imoveis sem tag")
-    public ResponseEntity<List<Imovel>> listarTodos() {
-
+    public ResponseEntity<List<ImovelResponse>> listarTodos() {
         return ResponseEntity.ok(imovelService.listarTodos());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Metodo de consulta de imóvel por id", description = "Metodo responsavel em buscar um imóvel específico")
-    public ResponseEntity<Imovel> buscarPorId(@PathVariable Long id) {
-
-        Imovel imovel = imovelService.buscarPorId(id);
+    public ResponseEntity<ImovelResponse> buscarPorId(@PathVariable Long id) {
+        ImovelResponse imovel = imovelService.buscarPorId(id);
 
         if (imovel != null) {
             return ResponseEntity.ok(imovel);
@@ -41,15 +40,13 @@ public class ImovelController {
 
     @PostMapping
     @Operation(summary = "Metodo de criação de imóveis", description = "Metodo responsavel em efetuar a criação de imóveis")
-    public ResponseEntity<Imovel> criar(@RequestBody Imovel imovel) {
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(imovelService.criar(imovel));
+    public ResponseEntity<ImovelResponse> criar(@RequestBody ImovelRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(imovelService.criar(request));
     }
 
     @PatchMapping("/{id}/statusImovel")
     @Operation(summary = "Metodo de atualização de status de imóveis", description = "Metodo responsavel em efetuar a atualização dos status dos imóveis")
     public ResponseEntity<Void> atualizarStatus(@PathVariable Long id, @RequestBody AtualizarStatusImovel statusImovelRequest) {
-
         if (imovelService.atualizarStatus(id, statusImovelRequest)) {
             return ResponseEntity.ok().build();
         }
@@ -58,9 +55,8 @@ public class ImovelController {
 
     @PutMapping("/{id}/atualizarImovel")
     @Operation(summary = "Metodo de atualização de imóveis", description = "Metodo responsavel em efetuar a atualização de imóveis")
-    public ResponseEntity<Imovel> atualizar(@PathVariable Long id, @RequestBody Imovel imovel) {
-
-        Imovel atualizado = imovelService.atualizar(id, imovel);
+    public ResponseEntity<ImovelResponse> atualizar(@PathVariable Long id, @RequestBody ImovelRequest request) {
+        ImovelResponse atualizado = imovelService.atualizar(id, request);
 
         if (atualizado != null) {
             return ResponseEntity.ok(atualizado);
@@ -71,7 +67,6 @@ public class ImovelController {
     @DeleteMapping("/{id}/excluirImovel")
     @Operation(summary = "Metodo de exclusão de imóveis", description = "Metodo responsavel em efetuar a exclusão de imóveis")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-
         if (imovelService.excluir(id)) {
             return ResponseEntity.ok().build();
         }

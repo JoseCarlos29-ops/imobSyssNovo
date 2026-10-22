@@ -1,8 +1,9 @@
 package org.example.imobsyss2.application.services;
 
 import org.example.imobsyss2.application.dtos.AtualizarStatusImovel;
-
 import org.example.imobsyss2.application.dtos.EnumStatusImovel;
+import org.example.imobsyss2.application.dtos.ImovelRequest;
+import org.example.imobsyss2.application.dtos.ImovelResponse;
 import org.example.imobsyss2.domain.entities.Imovel;
 import org.example.imobsyss2.domain.repository.ImovelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,23 +17,34 @@ public class ImovelService {
     @Autowired
     private ImovelRepository imovelRepository;
 
-    public List<Imovel> listarTodos() {
-
-        return imovelRepository.findAll();
+    public List<ImovelResponse> listarTodos() {
+        return imovelRepository.findAll().stream()
+                .map(ImovelResponse::new)
+                .toList();
     }
 
-    public Imovel buscarPorId(Long id) {
-
-        return imovelRepository.findById(id).orElse(null);
+    public ImovelResponse buscarPorId(Long id) {
+        return imovelRepository.findById(id)
+                .map(ImovelResponse::new)
+                .orElse(null);
     }
 
-    public Imovel criar(Imovel imovel) {
+    public ImovelResponse criar(ImovelRequest request) {
+        Imovel imovel = new Imovel();
+        imovel.setEndereco(request.endereco());
+        imovel.setTipo(request.tipo());
+        imovel.setValor(request.valor());
+        imovel.setArea(request.area());
+        imovel.setQuartos(request.quartos());
+        imovel.setBanheiros(request.banheiros());
+        imovel.setDescricao(request.descricao());
+        imovel.setProprietario(request.proprietario());
+        imovel.setStatus(EnumStatusImovel.DISPONIVEL); // use um valor que exista no seu enum
 
-        return imovelRepository.save(imovel);
+        return new ImovelResponse(imovelRepository.save(imovel));
     }
 
     public boolean atualizarStatus(Long id, AtualizarStatusImovel request) {
-
         Imovel imovelBanco = imovelRepository.findById(id).orElse(null);
 
         if (imovelBanco == null) {
@@ -44,29 +56,26 @@ public class ImovelService {
         return true;
     }
 
-    public Imovel atualizar(Long id, Imovel imovel) {
-
+    public ImovelResponse atualizar(Long id, ImovelRequest request) {
         Imovel imovelBanco = imovelRepository.findById(id).orElse(null);
 
         if (imovelBanco == null) {
             return null;
         }
 
-        imovelBanco.setStatus(imovel.getStatus());
-        imovelBanco.setEndereco(imovel.getEndereco());
-        imovelBanco.setTipo(imovel.getTipo());
-        imovelBanco.setValor(imovel.getValor());
-        imovelBanco.setArea(imovel.getArea());
-        imovelBanco.setQuartos(imovel.getQuartos());
-        imovelBanco.setBanheiros(imovel.getBanheiros());
-        imovelBanco.setDescricao(imovel.getDescricao());
-        imovelBanco.setProprietario(imovel.getProprietario());
+        imovelBanco.setEndereco(request.endereco());
+        imovelBanco.setTipo(request.tipo());
+        imovelBanco.setValor(request.valor());
+        imovelBanco.setArea(request.area());
+        imovelBanco.setQuartos(request.quartos());
+        imovelBanco.setBanheiros(request.banheiros());
+        imovelBanco.setDescricao(request.descricao());
+        imovelBanco.setProprietario(request.proprietario());
 
-        return imovelRepository.save(imovelBanco);
+        return new ImovelResponse(imovelRepository.save(imovelBanco));
     }
 
     public boolean excluir(Long id) {
-
         Imovel imovelBanco = imovelRepository.findById(id).orElse(null);
 
         if (imovelBanco == null) {

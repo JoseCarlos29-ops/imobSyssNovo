@@ -1,8 +1,10 @@
 package org.example.imobsyss2.application.services;
 
 import org.example.imobsyss2.application.dtos.AtualizarStatusContrato;
-import org.example.imobsyss2.domain.entities.Contrato;
+import org.example.imobsyss2.application.dtos.ContratoRequest;
+import org.example.imobsyss2.application.dtos.ContratoResponse;
 import org.example.imobsyss2.application.dtos.EnumStatusContrato;
+import org.example.imobsyss2.domain.entities.Contrato;
 import org.example.imobsyss2.domain.repository.ContratoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,23 +17,30 @@ public class ContratoService {
     @Autowired
     private ContratoRepository contratoRepository;
 
-    public List<Contrato> listarTodos() {
-
-        return contratoRepository.findAll();
+    public List<ContratoResponse> listarTodos() {
+        return contratoRepository.findAll().stream()
+                .map(ContratoResponse::new)
+                .toList();
     }
 
-    public Contrato buscarPorId(Long id) {
-
-        return contratoRepository.findById(id).orElse(null);
+    public ContratoResponse buscarPorId(Long id) {
+        return contratoRepository.findById(id)
+                .map(ContratoResponse::new)
+                .orElse(null);
     }
 
-    public Contrato criar(Contrato contrato) {
+    public ContratoResponse criar(ContratoRequest request) {
+        Contrato contrato = new Contrato();
+        contrato.setTipo(request.tipo());
+        contrato.setDataContrato(request.dataContrato());
+        contrato.setValorContrato(request.valorContrato());
+        contrato.setValorComissao(request.valorComissao());
+        contrato.setStatusContrato(EnumStatusContrato.ATIVO); // use um valor que exista no seu enum
 
-        return contratoRepository.save(contrato);
+        return new ContratoResponse(contratoRepository.save(contrato));
     }
 
     public boolean atualizarStatusContrato(Long id, AtualizarStatusContrato request) {
-
         Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
 
         if (contratoBanco == null) {
@@ -43,25 +52,22 @@ public class ContratoService {
         return true;
     }
 
-    public Contrato atualizar(Long id, Contrato contrato) {
-
+    public ContratoResponse atualizar(Long id, ContratoRequest request) {
         Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
 
         if (contratoBanco == null) {
             return null;
         }
 
-        contratoBanco.setTipo(contrato.getTipo());
-        contratoBanco.setStatusContrato(contrato.getStatusContrato());
-        contratoBanco.setDataContrato(contrato.getDataContrato());
-        contratoBanco.setValorContrato(contrato.getValorContrato());
-        contratoBanco.setValorComissao(contrato.getValorComissao());
+        contratoBanco.setTipo(request.tipo());
+        contratoBanco.setDataContrato(request.dataContrato());
+        contratoBanco.setValorContrato(request.valorContrato());
+        contratoBanco.setValorComissao(request.valorComissao());
 
-        return contratoRepository.save(contratoBanco);
+        return new ContratoResponse(contratoRepository.save(contratoBanco));
     }
 
     public boolean excluir(Long id) {
-
         Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
 
         if (contratoBanco == null) {

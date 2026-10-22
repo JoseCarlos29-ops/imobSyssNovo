@@ -3,12 +3,8 @@ package org.example.imobsyss2.presentation;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.imobsyss2.application.dtos.AtualizarStatusRequest;
-import org.example.imobsyss2.application.dtos.CriarAdminRequest;
-import org.example.imobsyss2.application.dtos.CriarAdminResponse;
-import org.example.imobsyss2.application.dtos.UsuarioResponse;
+import org.example.imobsyss2.application.dtos.*;
 import org.example.imobsyss2.application.services.UsuarioService;
-import org.example.imobsyss2.application.dtos.EnumStatusUsuario;
 import org.example.imobsyss2.domain.entities.Usuario;
 import org.example.imobsyss2.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,93 +16,92 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
-@Tag(name = "Usuarios", description = "Grupo de api's responsável por controlar a consulta de usuarios do sistema")
-
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private UsuarioService usuarioService;
 
-
     @GetMapping
-    public ResponseEntity<List<UsuarioResponse>> ListarTodosUsuariosTable(){
+    public ResponseEntity<List<UsuarioResponse>> listarTodos(){
 
         return  ResponseEntity.ok(usuarioService.listarTodosUsuariosTable());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id){
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-        if(usuarioBanco!= null){
-            return ResponseEntity.ok(usuarioBanco);
-        }
-        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/admin")
     public ResponseEntity<CriarAdminResponse> criarAdmin(@RequestBody CriarAdminRequest criarAdminRequest){
 
-        try {
-
+        try{
             CriarAdminResponse respostaSalvar = usuarioService.criarAdmin(criarAdminRequest);
             return ResponseEntity.ok(respostaSalvar);
-        } catch(RuntimeException e){
+
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
 
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id){
+
+        UsuarioResponse usuarioBanco = usuarioService.buscarPorId(id);
+        if(usuarioBanco!= null ){
+            return  ResponseEntity.ok(usuarioBanco);
+        }
+
+        return  ResponseEntity.notFound().build();
+    }
+
+
 
     @PostMapping
-    @Operation(summary = "Metodo de criação de usuarios", description = "Metodo responsavel em efetuar a criação de usuarios")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Usuario> criar(@RequestBody Usuario usuario) {
+    public ResponseEntity<?> criar(@RequestBody UsuarioRequest usuario){
 
-        var usuarioBanco = usuarioRepository.save(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioBanco);
+        try {
+            UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario,0L);
+            return ResponseEntity.ok(usuarioBanco);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> atualizarStatus(@PathVariable Long id, @RequestBody AtualizarStatusRequest statusRequest){
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-        if(usuarioBanco!= null ){
-            usuarioBanco.setStatus(statusRequest.status());
-            usuarioRepository.save(usuarioBanco);
-            return  ResponseEntity.ok().build();
+
+        var atualizarUsuario = usuarioService.atualizarStatus(statusRequest.status(),id);
+
+        if(atualizarUsuario){
+            return ResponseEntity.ok().build();
         }
+
         return  ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody UsuarioRequest usuario){
 
-        try {        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-            if (usuarioBanco != null){
-                usuarioBanco.setStatus(usuario.getStatus());
-                usuarioBanco.setNome(usuario.getNome());
-                usuarioBanco.setSenha(usuario.getSenha());
-                usuarioBanco.setCpf(usuario.getCpf());
-                usuarioBanco.setEmail(usuario.getEmail());
-                usuarioRepository.save(usuarioBanco);
-                return ResponseEntity.ok().build();
-            }
-            return ResponseEntity.notFound().build();
+        try {
+            UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario,id);
+            return ResponseEntity.ok(usuarioBanco);
         }catch (Exception e){
-            throw new RuntimeException(e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
+
     }
 
     @DeleteMapping("/{id}/excluir")
     public ResponseEntity<Void> excluir(@PathVariable Long id){
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-        if(usuarioBanco!= null ){
-            usuarioBanco.setStatus(EnumStatusUsuario.EXCLUIDO);
-            usuarioRepository.save(usuarioBanco);
-            return  ResponseEntity.ok().build();
+
+        var atualizarUsuario = usuarioService.atualizarStatus(EnumStatusUsuario.EXCLUIDO,id);
+
+        if(atualizarUsuario){
+            return ResponseEntity.ok().build();
         }
+
         return  ResponseEntity.notFound().build();
+
     }
+
 }
