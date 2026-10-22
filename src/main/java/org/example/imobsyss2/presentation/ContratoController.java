@@ -1,60 +1,56 @@
 package org.example.imobsyss2.presentation;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.imobsyss2.application.dtos.AtualizarStatusContrato;
+import org.example.imobsyss2.application.services.ContratoService;
 import org.example.imobsyss2.domain.entities.Contrato;
-import org.example.imobsyss2.domain.entities.EnumStatusContrato;
-import org.example.imobsyss2.domain.entities.Usuario;
-import org.example.imobsyss2.domain.repository.ContratoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+import java.util.List;
 
+@RestController
 @RequestMapping("/contratos")
 @Tag(name = "Contratos", description = "Grupo de api's responsável por controlar a consulta de contratos")
 public class ContratoController {
 
     @Autowired
-    private ContratoRepository contratoRepository;
+    private ContratoService contratoService;
 
     @GetMapping
     @Operation(summary = "Metodo de consulta de lista de contratos", description = "Metodo responsavel em efetuar a consulta de todos os contratos sem tag")
-    public ResponseEntity<?> listarTodos() {
+    public ResponseEntity<List<Contrato>> listarTodos() {
 
-        return ResponseEntity.ok(contratoRepository.findAll());
+        return ResponseEntity.ok(contratoService.listarTodos());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Metodo de consulta de contrato por id", description = "Metodo responsavel em buscar um contrato específico")
     public ResponseEntity<Contrato> buscarPorId(@PathVariable Long id) {
-        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
-        if (contratoBanco != null) {
-            return ResponseEntity.ok(contratoBanco);
+
+        Contrato contrato = contratoService.buscarPorId(id);
+
+        if (contrato != null) {
+            return ResponseEntity.ok(contrato);
         }
         return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Metodo de criação de contrato", description = "Metodo responsavel em efetuar a criação de contratos")
     public ResponseEntity<Contrato> criar(@RequestBody Contrato contrato) {
 
-        var contratoBanco = contratoRepository.save(contrato);
-        return ResponseEntity.ok(contratoBanco);
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(contratoService.criar(contrato));
     }
 
-    @PatchMapping("{id}/AtualizarStatusContrato")
-    public ResponseEntity<Void> AtualizarStatusCliente(@PathVariable Long id, @RequestBody AtualizarStatusContrato statusContratoResquest) {
-        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
-        if(contratoBanco!=null){
-            contratoBanco.setStatusContrato(statusContratoResquest.statusContrato());
-            contratoRepository.save(contratoBanco);
+    @PatchMapping("/{id}/AtualizarStatusContrato")
+    @Operation(summary = "Metodo de atualização de status de contratos", description = "Metodo responsavel em efetuar a atualização do status dos contratos")
+    public ResponseEntity<Void> atualizarStatusContrato(@PathVariable Long id, @RequestBody AtualizarStatusContrato statusContratoRequest) {
 
+        if (contratoService.atualizarStatusContrato(id, statusContratoRequest)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -62,40 +58,23 @@ public class ContratoController {
 
     @PutMapping("/{id}/atualizarContratos")
     @Operation(summary = "Metodo de atualização de Contratos", description = "Metodo responsavel em efetuar a atualização de Contratos")
-    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Contrato contrato) {
+    public ResponseEntity<Contrato> atualizar(@PathVariable Long id, @RequestBody Contrato contrato) {
 
-        try {
-            Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
-            if (contratoBanco != null) {
-                contratoBanco.setTipo(contrato.getTipo());
-                contratoBanco.setStatusContrato(contrato.getStatusContrato());
-                contratoBanco.setDataContrato(contrato.getDataContrato());
-                contratoBanco.setValorContrato(contrato.getValorContrato());
-                contratoBanco.setValorComissao(contrato.getValorComissao());
+        Contrato atualizado = contratoService.atualizar(id, contrato);
 
-                contratoRepository.save(contratoBanco);
-
-
-                return ResponseEntity.ok().build();
-            }
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (atualizado != null) {
+            return ResponseEntity.ok(atualizado);
         }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}/excluirContrato")
-    @Operation(summary = "Metodo de exclusão de contrato", description = "Metodo responsavel em efetuar a exclusão de clientes")
-    public ResponseEntity<Void> excluirContrato(@PathVariable Long id){
-        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
-        if(contratoBanco!= null ){
-            contratoBanco.setStatusContrato(EnumStatusContrato.CANCELADO);
-            contratoRepository.save(contratoBanco);
-            return  ResponseEntity.ok().build();
+    @Operation(summary = "Metodo de exclusão de contrato", description = "Metodo responsavel em efetuar o cancelamento de contratos")
+    public ResponseEntity<Void> excluirContrato(@PathVariable Long id) {
+
+        if (contratoService.excluir(id)) {
+            return ResponseEntity.ok().build();
         }
-        return  ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
     }
-
-
-
 }

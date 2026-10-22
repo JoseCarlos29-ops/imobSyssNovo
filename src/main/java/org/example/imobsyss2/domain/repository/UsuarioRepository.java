@@ -1,6 +1,6 @@
 package org.example.imobsyss2.domain.repository;
 
-import org.example.imobsyss2.domain.entities.EnumStatusUsuario;
+import org.example.imobsyss2.application.dtos.EnumStatusUsuario;
 import org.example.imobsyss2.domain.entities.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

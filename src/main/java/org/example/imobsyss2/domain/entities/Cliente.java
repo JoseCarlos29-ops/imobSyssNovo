@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.imobsyss2.application.dtos.EnumStatusCliente;
 
 @Entity
 @Data

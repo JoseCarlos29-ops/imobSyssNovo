@@ -8,7 +8,7 @@ import org.example.imobsyss2.application.dtos.CriarAdminRequest;
 import org.example.imobsyss2.application.dtos.CriarAdminResponse;
 import org.example.imobsyss2.application.dtos.UsuarioResponse;
 import org.example.imobsyss2.application.services.UsuarioService;
-import org.example.imobsyss2.domain.entities.EnumStatusUsuario;
+import org.example.imobsyss2.application.dtos.EnumStatusUsuario;
 import org.example.imobsyss2.domain.entities.Usuario;
 import org.example.imobsyss2.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;

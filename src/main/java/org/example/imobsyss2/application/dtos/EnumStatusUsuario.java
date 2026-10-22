@@ -1,4 +1,4 @@
-package org.example.imobsyss2.domain.entities;
+package org.example.imobsyss2.application.dtos;
 
 public enum EnumStatusUsuario {
 

@@ -1,4 +1,4 @@
-package org.example.imobsyss2.application.services;
+/*package org.example.imobsyss2.application.services;
 
 import lombok.RequiredArgsConstructor;
 import org.example.imobsyss2.application.dtos.CriarTipoImovelRequest;
@@ -42,3 +42,4 @@ public class TipodeImovelService {
         }
     }
 }
+*/
