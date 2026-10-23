@@ -20,17 +20,25 @@ public class SecurityConfiguration {
     private JwtFilter jwtFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain (HttpSecurity http) throws Exception{
 
         return http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login",
-                        "swagger-ui/**",
-                        "/webjars/**",
-                        "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/login",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/swagger-resources/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .requestMatchers("/usuarios/**")
+                        .hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore( jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+
     }
+
 
 }

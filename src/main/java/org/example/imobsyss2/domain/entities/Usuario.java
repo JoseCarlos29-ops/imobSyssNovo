@@ -4,10 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.imobsyss2.application.dtos.CriarAdminRequest;
 import org.example.imobsyss2.application.dtos.EnumStatusUsuario;
+import org.example.imobsyss2.application.dtos.UsuarioLogado;
 import org.example.imobsyss2.application.dtos.UsuarioRequest;
 import org.example.imobsyss2.domain.valueObject.CPF;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -35,10 +38,12 @@ public class Usuario implements UserDetails {
 
     private String role = "ROLE_USER";
 
+    private Long empresa_id;
+
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
     public void setEmail(String email) {
-        if (!email.isEmpty() && !email.contains("@")) {
+        if(!email.isEmpty() && !email.contains("@")){
             throw new IllegalArgumentException("Email Invalido!");
         }
         this.email = email;
@@ -50,6 +55,7 @@ public class Usuario implements UserDetails {
         this.setSenha(criarAdminRequest.senha());
         this.setEmail(criarAdminRequest.email());
         this.setRole("ROLE_ADMIN");
+
     }
 
     public Usuario(UsuarioRequest usuario) {
@@ -60,9 +66,11 @@ public class Usuario implements UserDetails {
         this.setRole("ROLE_USER");
     }
 
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new SimpleGrantedAuthority(this.role));
     }
 
     @Override

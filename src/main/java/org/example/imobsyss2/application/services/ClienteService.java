@@ -36,7 +36,7 @@ public class ClienteService {
         cliente.setEmail(request.email());
         cliente.setTelefone(request.telefone());
         cliente.setEndereco(request.endereco());
-        cliente.setStatusCliente(EnumStatusCliente.ATIVO); // use um valor que exista no seu enum
+        cliente.setStatusCliente(EnumStatusCliente.CLIENTE_ATIVO); // use um valor que exista no seu enum
 
         return new ClienteResponse(clienteRepository.save(cliente));
     }
