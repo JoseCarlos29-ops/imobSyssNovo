@@ -1,10 +1,7 @@
 package org.example.imobsyss2.domain.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,5 +28,8 @@ public class Contrato {
     private double dataContrato;
 
     private EnumStatusContrato statusContrato;
+
+    @Column(name = "empresa_id")
+    private Long empresaId;
 
 }
