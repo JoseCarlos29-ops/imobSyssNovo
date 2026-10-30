@@ -1,10 +1,8 @@
 package org.example.imobsyss2.infra.configuration;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authorization.AuthoritiesAuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,14 +29,14 @@ public class SecurityConfiguration {
                                 "/swagger-resources/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers("/usuarios/**")
-                        .hasRole("ADMIN")
+                        .requestMatchers("/usuarios/**",
+                                "/clientes/**",
+                                "/imoveis/**",
+                                "/contratos/**"
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore( jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
-
-
 }
