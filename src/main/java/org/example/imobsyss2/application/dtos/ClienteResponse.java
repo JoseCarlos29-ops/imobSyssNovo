@@ -9,7 +9,7 @@ public record ClienteResponse(Long id, String nome, String cpf, String email, St
         this(
                 clienteEntidade.getId(),
                 clienteEntidade.getNome(),
-                clienteEntidade.getCpf(),
+                clienteEntidade.getCpf().toString(),
                 clienteEntidade.getEmail(),
                 clienteEntidade.getTelefone(),
                 clienteEntidade.getEndereco(),

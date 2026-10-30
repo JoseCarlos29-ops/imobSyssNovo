@@ -3,6 +3,7 @@ package org.example.imobsyss2.infra.configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,11 +30,14 @@ public class SecurityConfiguration {
                                 "/swagger-resources/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers("/usuarios/**",
-                                "/clientes/**",
-                                "/imoveis/**",
-                                "/contratos/**"
-                        ).hasRole("ADMIN")
+                        .requestMatchers("/usuarios/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/clientes/**", "/imoveis/**", "/contratos/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/imoveis/**")
+                        .hasAnyRole("ADMIN", "CORRETOR", "USER")
+                        .requestMatchers("/clientes/**", "/imoveis/**", "/contratos/**")
+                        .hasAnyRole("ADMIN", "CORRETOR")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

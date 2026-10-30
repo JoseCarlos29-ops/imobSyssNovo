@@ -1,10 +1,6 @@
 package org.example.imobsyss2.application.services;
 
-import org.example.imobsyss2.application.dtos.AtualizarStatusContrato;
-import org.example.imobsyss2.application.dtos.ContratoRequest;
-import org.example.imobsyss2.application.dtos.ContratoResponse;
-import org.example.imobsyss2.application.dtos.EnumStatusContrato;
-import org.example.imobsyss2.application.dtos.UsuarioLogado;
+import org.example.imobsyss2.application.dtos.*;
 import org.example.imobsyss2.domain.entities.Contrato;
 import org.example.imobsyss2.domain.repository.ContratoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,64 +20,65 @@ public class ContratoService {
     }
 
     public List<ContratoResponse> listarTodos() {
-        var usuarioLogado = getUsuarioLogado();
-        return contratoRepository.findByEmpresaId(usuarioLogado.empresa_id()).stream()
+
+        return contratoRepository.findAll()
+                .stream()
                 .map(ContratoResponse::new)
                 .toList();
     }
 
     public ContratoResponse buscarPorId(Long id) {
-        var usuarioLogado = getUsuarioLogado();
-        return contratoRepository.findByIdAndEmpresaId(id, usuarioLogado.empresa_id())
-                .map(ContratoResponse::new)
-                .orElse(null);
+
+        var contrato = contratoRepository.findById(id).orElse(null);
+        if(contrato == null){
+            return null;
+        }
+
+        return new ContratoResponse(contrato);
     }
 
     public ContratoResponse criar(ContratoRequest request) {
-        var usuarioLogado = getUsuarioLogado();
-        Contrato contrato = new Contrato();
-        contrato.setTipo(request.tipo());
-        contrato.setDataContrato(request.dataContrato());
-        contrato.setValorContrato(request.valorContrato());
-        contrato.setValorComissao(request.valorComissao());
-        contrato.setStatusContrato(EnumStatusContrato.ATIVO);
-        contrato.setEmpresaId(usuarioLogado.empresa_id());
 
-        return new ContratoResponse(contratoRepository.save(contrato));
+        var usuarioLogado = getUsuarioLogado();
+
+        Contrato contratoBanco = new Contrato(request);
+        contratoBanco.setEmpresa_id(usuarioLogado.empresa_id());
+        contratoRepository.save(contratoBanco);
+
+        return new ContratoResponse(contratoBanco);
     }
 
     public boolean atualizarStatusContrato(Long id, AtualizarStatusContrato request) {
-        var usuarioLogado = getUsuarioLogado();
-        Contrato contratoBanco = contratoRepository.findByIdAndEmpresaId(id, usuarioLogado.empresa_id()).orElse(null);
-        if (contratoBanco == null) {
-            return false;
+
+        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
+        if(contratoBanco != null){
+            contratoBanco.setStatusContrato(request.statusContrato());
+            contratoRepository.save(contratoBanco);
+            return true;
         }
-        contratoBanco.setStatusContrato(request.statusContrato());
-        contratoRepository.save(contratoBanco);
-        return true;
+        return false;
     }
 
     public ContratoResponse atualizar(Long id, ContratoRequest request) {
+
         var usuarioLogado = getUsuarioLogado();
-        Contrato contratoBanco = contratoRepository.findByIdAndEmpresaId(id, usuarioLogado.empresa_id()).orElse(null);
-        if (contratoBanco == null) {
-            return null;
+
+        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
+        if(contratoBanco != null){
+            contratoBanco.setTipo(request.tipo());
+            contratoBanco.setValorContrato(request.valorContrato());
+            contratoBanco.setValorComissao(request.valorComissao());
+            contratoBanco.setDataContrato(request.dataContrato());
+            contratoBanco.setEmpresa_id(usuarioLogado.empresa_id());
+            contratoRepository.save(contratoBanco);
+            return new ContratoResponse(contratoBanco);
         }
-        contratoBanco.setTipo(request.tipo());
-        contratoBanco.setDataContrato(request.dataContrato());
-        contratoBanco.setValorContrato(request.valorContrato());
-        contratoBanco.setValorComissao(request.valorComissao());
-        return new ContratoResponse(contratoRepository.save(contratoBanco));
+
+        return null;
     }
 
     public boolean excluir(Long id) {
-        var usuarioLogado = getUsuarioLogado();
-        Contrato contratoBanco = contratoRepository.findByIdAndEmpresaId(id, usuarioLogado.empresa_id()).orElse(null);
-        if (contratoBanco == null) {
-            return false;
-        }
-        contratoBanco.setStatusContrato(EnumStatusContrato.CANCELADO);
-        contratoRepository.save(contratoBanco);
-        return true;
+
+        return atualizarStatusContrato(id, new AtualizarStatusContrato(EnumStatusContrato.CANCELADO));
     }
 }

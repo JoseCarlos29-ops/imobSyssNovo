@@ -1,4 +1,4 @@
-package org.example.imobsyss2.domain.entities;
+/*package org.example.imobsyss2.domain.entities;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,3 +14,4 @@ public class TipodeImovel {
 
     private String descricao;
 }
+*/

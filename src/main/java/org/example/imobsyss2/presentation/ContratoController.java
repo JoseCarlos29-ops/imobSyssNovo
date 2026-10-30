@@ -40,10 +40,14 @@ public class ContratoController {
 
     @PostMapping
     @Operation(summary = "Metodo de criação de contrato", description = "Metodo responsavel em efetuar a criação de contratos")
-    public ResponseEntity<ContratoResponse> criar(@RequestBody ContratoRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(contratoService.criar(request));
-    }
+    public ResponseEntity<?> criar(@RequestBody ContratoRequest request) {
 
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(contratoService.criar(request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     @PatchMapping("/{id}/AtualizarStatusContrato")
     @Operation(summary = "Metodo de atualização de status de contratos", description = "Metodo responsavel em efetuar a atualização do status dos contratos")
     public ResponseEntity<Void> atualizarStatusContrato(@PathVariable Long id, @RequestBody AtualizarStatusContrato statusContratoRequest) {
@@ -55,13 +59,18 @@ public class ContratoController {
 
     @PutMapping("/{id}/atualizarContratos")
     @Operation(summary = "Metodo de atualização de Contratos", description = "Metodo responsavel em efetuar a atualização de Contratos")
-    public ResponseEntity<ContratoResponse> atualizar(@PathVariable Long id, @RequestBody ContratoRequest request) {
-        ContratoResponse atualizado = contratoService.atualizar(id, request);
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ContratoRequest request) {
 
-        if (atualizado != null) {
-            return ResponseEntity.ok(atualizado);
+        try {
+            ContratoResponse atualizado = contratoService.atualizar(id, request);
+
+            if (atualizado != null) {
+                return ResponseEntity.ok(atualizado);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}/excluirContrato")

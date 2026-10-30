@@ -40,9 +40,15 @@ public class ClienteController {
 
     @PostMapping
     @Operation(summary = "Metodo de criação de cliente", description = "Metodo responsavel em efetuar a criação de clientes")
-    public ResponseEntity<ClienteResponse> criar(@RequestBody ClienteRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.criar(request));
+    public ResponseEntity<?> criar(@RequestBody ClienteRequest request) {
+
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.criar(request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
 
     @PatchMapping("/{id}/statusCliente")
     @Operation(summary = "Metodo de atualização de status de clientes", description = "Metodo responsavel em efetuar a atualização dos status dos clientes")
@@ -55,13 +61,18 @@ public class ClienteController {
 
     @PutMapping("/{id}/atualizarCliente")
     @Operation(summary = "Metodo de atualização de clientes", description = "Metodo responsavel em efetuar a atualização de clientes")
-    public ResponseEntity<ClienteResponse> atualizar(@PathVariable Long id, @RequestBody ClienteRequest request) {
-        ClienteResponse atualizado = clienteService.atualizar(id, request);
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ClienteRequest request) {
 
-        if (atualizado != null) {
-            return ResponseEntity.ok(atualizado);
+        try {
+            ClienteResponse atualizado = clienteService.atualizar(id, request);
+
+            if (atualizado != null) {
+                return ResponseEntity.ok(atualizado);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}/excluirCliente")

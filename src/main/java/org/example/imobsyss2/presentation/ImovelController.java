@@ -40,8 +40,13 @@ public class ImovelController {
 
     @PostMapping
     @Operation(summary = "Metodo de criação de imóveis", description = "Metodo responsavel em efetuar a criação de imóveis")
-    public ResponseEntity<ImovelResponse> criar(@RequestBody ImovelRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(imovelService.criar(request));
+    public ResponseEntity<?> criar(@RequestBody ImovelRequest request) {
+
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(imovelService.criar(request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PatchMapping("/{id}/statusImovel")
@@ -55,13 +60,18 @@ public class ImovelController {
 
     @PutMapping("/{id}/atualizarImovel")
     @Operation(summary = "Metodo de atualização de imóveis", description = "Metodo responsavel em efetuar a atualização de imóveis")
-    public ResponseEntity<ImovelResponse> atualizar(@PathVariable Long id, @RequestBody ImovelRequest request) {
-        ImovelResponse atualizado = imovelService.atualizar(id, request);
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ImovelRequest request) {
 
-        if (atualizado != null) {
-            return ResponseEntity.ok(atualizado);
+        try {
+            ImovelResponse atualizado = imovelService.atualizar(id, request);
+
+            if (atualizado != null) {
+                return ResponseEntity.ok(atualizado);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}/excluirImovel")
