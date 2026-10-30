@@ -1,70 +1,61 @@
 'use client'
 import axios from "axios";
+import { atualizarUsuario, salvarUsuario } from "@/app/services/usuarioService";
 import { useRouter } from "next/navigation";
 import { Usuario, UsuarioFormProps } from "@/app/types/usuario";
 import Link from "next/link";
 import { useState } from "react";
 
-export default function UsuarioForm({usuarioExistente} : UsuarioFormProps) {
+export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
+  const router = useRouter();
 
-  const router = useRouter()
+  const [ usuario,setUsuario ] = useState<Usuario>(
+      usuarioExistente ||
+      new Usuario(null,"","","ATIVO","","")
+  );
 
-  const [usuario, setUsuario] = useState<Usuario> (usuarioExistente || new Usuario(null, "", "", "ATIVO", "", "")); 
+  const handlerChange = ( campo: 'nome'|  'email' |'cpf'| 'senha', valor:string) =>{
+      setUsuario(valorAnterior => 
+          new Usuario(
+              valorAnterior.id,
+              campo === 'nome' ? valor : valorAnterior.nome,
+              campo === 'email' ? valor : valorAnterior.email,
+              valorAnterior.status,
+              campo === 'cpf' ? valor : valorAnterior.cpf,
+              campo === 'senha' ? valor : valorAnterior.senha
+          )
+      )
+  }
 
-  
 
 
-const handlerSalvar = async (formData : FormData) => {
+  const handlerSalvar = async (formData : FormData) =>{
 
   if(usuarioExistente){
+      var dadosRetorno = await atualizarUsuario(usuario);
+      if(dadosRetorno){
+          alert("Usuário foi salvo com sucesso!");
+      }else{
+          alert("Erro ao atualizar Usuário!");
 
-    var dadosRetorno = await axios.put<number>( 'http://localhost:8080/usuarios' +usuario.id, usuario);
+          return;
+      }
 
-  if(dadosRetorno.status ==200){
-  
-    alert("Usuario foi salvo com sucesso");
-    
+
   }else{
+      var dadosRetorno = await salvarUsuario(usuario);
+      if(dadosRetorno){
+          alert("Usuário foi salvo com sucesso!");
+      }else{
+          alert("Erro ao salvar Usuário!");
 
-    alert(dadosRetorno.data)
-    return;
+          return;
+      }
+  
   }
 
-  router.push("/usuarios")
+  router.push("/usuarios");
 
-
-
-  }else{
-
-  var dadosRetorno = await axios.post<number>( 'http://localhost:8080/usuarios', usuario);
-
-  if(dadosRetorno.status ==200){
-  
-    alert("Usuario foi salvo com sucesso");
-    
-  }else{
-
-    alert(dadosRetorno.data)
-    return;
-  }
-
-  router.push("/usuarios")
-
-}
-}
-
-  const handlerChange = ( campos: 'nome' | 'email' | 'cpf' | 'senha', valor:string) => {
-    setUsuario(valorAnterior => new Usuario(
-
-      valorAnterior.id,
-      campos === 'nome' ? valor : valorAnterior.nome,
-      campos === 'email' ? valor : valorAnterior.email,
-      valorAnterior.status,
-      campos === 'cpf' ? valor : valorAnterior.cpf,
-      campos === 'senha' ? valor: valorAnterior.senha
-      
-
-    ) )
   }
 
   return (

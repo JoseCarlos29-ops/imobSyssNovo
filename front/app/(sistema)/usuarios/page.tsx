@@ -1,65 +1,53 @@
 "use client"
+import { atualizarStatusUsuario, buscarListaUsuarios, deletarUsuario } from "@/app/services/usuarioService";
 import { Usuario } from "@/app/types/usuario";
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export default function Usuarios() {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+export default function Usuarios(){
 
-  useEffect(() => {
-    carregarDados();
-  }, []);
+  const [usuarios,setUsuarios] = useState<Usuario[]>([]);
 
-  const carregarDados = async () => {
-    try {
-      const dados = await axios.get<Usuario[]>("http://localhost:8080/usuarios");
-      setUsuarios(dados.data);
-    } catch (error) {
-      alert("Erro ao carregar dados!");
-    }
-  };
+  useEffect(()=>{
+      carregarDados();
+  },[]);
 
-  const handleDeletarUsuario = async (usuario: Usuario) => {
+  const carregarDados = async ()=>{
 
-    var dadosRetorno = await axios.delete('http://localhost:8080/usuarios/' + usuario.id + '/excluir');
+      try {
+          const dados = await buscarListaUsuarios();
 
-    if (dadosRetorno.status == 200) {
+          setUsuarios( dados);
 
-      alert("Usuario foi deletado com sucesso");
-
-    } else {
-
-      alert(dadosRetorno.data)
-      return;
-    }
-
-    carregarDados();
+      } catch (error) {
+          alert("Erro ao carregar dados!")
+      }
+     
 
   }
 
-  const handleAlterarStatusUsuario = async (usuario: Usuario) => {
+  const handleDeletarUsuario = async(usuario:Usuario) =>{
 
+      var dadosRetorno = await  deletarUsuario(usuario.id || 0);
+     
+      if(dadosRetorno==200){
+          alert("Excluido com sucesso!");
+      }else{
+          alert("Erro ao excluir usuário!");
 
-    var novoStatus = {};
-    if (usuario.status === "ATIVO") {
-      novoStatus = { status: "BLOQUEADO" }
-    } else {
-      novoStatus = { status: "ATIVO" }
-    }
+          return;
+      }
 
-    var dadosRetorno = await
-      axios.patch('http://localhost:8080/usuarios/' + usuario.id + '/status', novoStatus);
+      carregarDados();
 
-    if (dadosRetorno.status == 200) {
-      alert("Atulizado status com sucesso!");
-    } else {
-      alert(dadosRetorno.data);
+  }
 
-      return;
-    }
+  const handleAlterarStatusUsuario = async(usuario:Usuario) =>{
 
-    carregarDados();
+      await atualizarStatusUsuario(usuario);
+
+      carregarDados();
 
   }
 

@@ -1,5 +1,5 @@
 "use client"
-
+import { consultaUsuarioPorId } from "@/app/services/usuarioService";
 import { Usuario } from "@/app/types/usuario";
 import axios from "axios";
 import Link from "next/link";
@@ -7,34 +7,33 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import UsuarioForm from "../../components/UsuarioForm";
 
-export default function EditarUsuario() {
+export default function EditarUsuario(){
 
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
 
-    const [usuario, setUsuario] = useState<Usuario | null>(null)
+    const [usuario,setUsuario] = useState<Usuario|null>(null)
     const router = useRouter();
 
-    useEffect(() => {
+    useEffect(()=>{
 
         buscarDados();
 
-    }, []);
+    },[]);
 
-    const buscarDados = async () => {
+    const buscarDados =async() =>{
 
-        const valorUsuarioBack = await axios.get<Usuario>('http://localhost:8080/usuarios/' + codigo);
-
-        if (valorUsuarioBack.status == 200) {
-            setUsuario(valorUsuarioBack.data);
-        } else {
+        const valorUsuarioBack = await consultaUsuarioPorId(codigo);
+        if(valorUsuarioBack){
+            setUsuario(valorUsuarioBack);
+        }else{
             router.push("/usuarios")
         }
 
     }
 
-    if (!usuario) return (<div className="p-8"> Carregando Dados ...</div>)
+    if(!usuario) return(<div className="p-8"> Carregando Dados ...</div>)
 
 
     return (

@@ -4,41 +4,36 @@ import { LoginResponse } from "@/app/types/auth";
 import axios from "axios";
 import { handler } from "next/dist/build/templates/app-route";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 
-export default function Login() {
+export default function Login(){
+  const router = useRouter();
 
+  const handleLogin = async(formData:FormData) =>{
+      try {
+          debugger;
+          const emailTela = formData.get("email")?.toString() ?? "";
+          const senhaTela = formData.get("senha")?.toString() ?? "";
 
+          var loginResposta = await axios.post<LoginResponse>("http://localhost:8080/auth/login",
+          {email:emailTela,senha:senhaTela});
 
-    
-    const router = useRouter();
-    const handlerLogin = async(formData: FormData) =>{
-
-try{
-      const emailTela = formData.get("email")?.toString() ?? "";
-      const senhaTela = formData.get("senha")?.toString() ?? "";
-
-
-    var loginResposta = await axios.post<LoginResponse>("http://localhost:8080/auth/login", 
-    {email: emailTela, senha: senhaTela})
-
-    if(loginResposta.status == 200){
-      router.push("/home")
-    }
-
-    else{
-    alert ("Login ou senha invalido!")
-    }
-
-   } catch (error){
-      alert ("Login ou senha invalido")
-    }
-  
+          if(loginResposta.status==200){
+              Cookies.set('token',loginResposta.data.token,{secure: true, expires: 7});
+              router.push("/home")
+          }else{
+              alert("Login ou senha Invalido!")
+          }
+      } catch (error) {
+          alert("Login ou senha Invalido!")
+      }
+  }
 
         
    
 
-    }
+    
 
 
 
@@ -58,7 +53,7 @@ try{
               Entrar no sistema
             </h1>
           </div>
-          <form action={handlerLogin} className="space-y-5">
+          <form action={handleLogin} className="space-y-5">
             <div>
               {/* LABEL */}
               <label className="block text-xs font-medium text-black mb-1.5 uppercase tracking-wider">
