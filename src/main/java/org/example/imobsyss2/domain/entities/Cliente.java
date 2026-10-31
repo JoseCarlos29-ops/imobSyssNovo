@@ -3,19 +3,25 @@ package org.example.imobsyss2.domain.entities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.example.imobsyss2.application.dtos.ClienteRequest;
 import org.example.imobsyss2.application.dtos.EnumStatusCliente;
 import org.example.imobsyss2.domain.valueObject.CPF;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Cliente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     private String nome;
@@ -31,7 +37,21 @@ public class Cliente {
 
     private EnumStatusCliente statusCliente = EnumStatusCliente.CLIENTE_ATIVO;
 
-    private Long empresa_id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
+    private Empresa empresa;
+
+    @ManyToMany
+    @JoinTable(
+            name = "tb_interesse",
+            joinColumns = @JoinColumn(name = "cliente_id"),
+            inverseJoinColumns = @JoinColumn(name = "imovel_id")
+    )
+    private Set<Imovel> imoveis = new HashSet<>();
+
+    public void interessar(Imovel imovel){
+        this.imoveis.add(imovel);
+    }
 
     public void setNome(String nome) {
         if(nome == null || nome.isBlank()){

@@ -1,7 +1,9 @@
 package org.example.imobsyss2.application.services;
 
 import org.example.imobsyss2.application.dtos.*;
+import org.example.imobsyss2.domain.entities.Empresa;
 import org.example.imobsyss2.domain.entities.Contrato;
+import org.example.imobsyss2.domain.repository.EmpresaRepository;
 import org.example.imobsyss2.domain.repository.ContratoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,13 +17,33 @@ public class ContratoService {
     @Autowired
     private ContratoRepository contratoRepository;
 
+    @Autowired
+    private EmpresaRepository empresaRepository;
+
     public UsuarioLogado getUsuarioLogado(){
         return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    private Empresa buscarEmpresaDoUsuarioLogado() {
+        var empresaId = getUsuarioLogado().empresa_id();
+        if (empresaId == null) {
+            return null;
+        }
+        return empresaRepository.findById(empresaId).orElse(null);
+    }
+
     public List<ContratoResponse> listarTodos() {
 
-        return contratoRepository.findAll()
+        var usuarioLogado = getUsuarioLogado();
+
+        if (usuarioLogado.empresa_id() == null) {
+            return contratoRepository.findAll()
+                    .stream()
+                    .map(ContratoResponse::new)
+                    .toList();
+        }
+
+        return contratoRepository.getContratosByEmpresa_Id(usuarioLogado.empresa_id())
                 .stream()
                 .map(ContratoResponse::new)
                 .toList();
@@ -39,10 +61,8 @@ public class ContratoService {
 
     public ContratoResponse criar(ContratoRequest request) {
 
-        var usuarioLogado = getUsuarioLogado();
-
         Contrato contratoBanco = new Contrato(request);
-        contratoBanco.setEmpresa_id(usuarioLogado.empresa_id());
+        contratoBanco.setEmpresa(buscarEmpresaDoUsuarioLogado());
         contratoRepository.save(contratoBanco);
 
         return new ContratoResponse(contratoBanco);
@@ -61,15 +81,12 @@ public class ContratoService {
 
     public ContratoResponse atualizar(Long id, ContratoRequest request) {
 
-        var usuarioLogado = getUsuarioLogado();
-
         Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
         if(contratoBanco != null){
             contratoBanco.setTipo(request.tipo());
             contratoBanco.setValorContrato(request.valorContrato());
             contratoBanco.setValorComissao(request.valorComissao());
             contratoBanco.setDataContrato(request.dataContrato());
-            contratoBanco.setEmpresa_id(usuarioLogado.empresa_id());
             contratoRepository.save(contratoBanco);
             return new ContratoResponse(contratoBanco);
         }

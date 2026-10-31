@@ -2,10 +2,7 @@ package org.example.imobsyss2.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.imobsyss2.application.dtos.CriarAdminRequest;
-import org.example.imobsyss2.application.dtos.EnumStatusUsuario;
-import org.example.imobsyss2.application.dtos.UsuarioLogado;
-import org.example.imobsyss2.application.dtos.UsuarioRequest;
+import org.example.imobsyss2.application.dtos.*;
 import org.example.imobsyss2.domain.valueObject.CPF;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -38,7 +35,9 @@ public class Usuario implements UserDetails {
 
     private String role = "ROLE_USER";
 
-    private Long empresa_id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
+    private Empresa empresa;
 
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
@@ -65,6 +64,7 @@ public class Usuario implements UserDetails {
         this.setEmail(usuario.email());
         this.setRole("ROLE_USER");
     }
+
 
 
 

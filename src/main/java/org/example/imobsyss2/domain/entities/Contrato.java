@@ -3,6 +3,7 @@ package org.example.imobsyss2.domain.entities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.example.imobsyss2.application.dtos.ContratoRequest;
 import org.example.imobsyss2.application.dtos.EnumStatusContrato;
@@ -11,10 +12,12 @@ import org.example.imobsyss2.application.dtos.EnumStatusContrato;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Contrato {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     private String tipo;
@@ -27,7 +30,9 @@ public class Contrato {
 
     private EnumStatusContrato statusContrato = EnumStatusContrato.ATIVO;
 
-    private Long empresa_id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
+    private Empresa empresa;
 
     public void setTipo(String tipo) {
         if(tipo == null || tipo.isBlank()){

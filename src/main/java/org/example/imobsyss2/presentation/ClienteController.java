@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.imobsyss2.application.dtos.AtualizarStatusCliente;
 import org.example.imobsyss2.application.dtos.ClienteRequest;
 import org.example.imobsyss2.application.dtos.ClienteResponse;
+import org.example.imobsyss2.application.dtos.InteresseRequest;
 import org.example.imobsyss2.application.services.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,19 @@ public class ClienteController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PatchMapping("/{id}/interessarImovel")
+    @Operation(summary = "Metodo de registro de interesse do cliente em um imovel", description = "Metodo responsavel em vincular um imovel de interesse ao cliente")
+    public ResponseEntity<?> interessarImovel(@PathVariable Long id, @RequestBody InteresseRequest interesseRequest) {
+
+        boolean retornoInteresse = clienteService.registrarInteresse(id, interesseRequest);
+
+        if (retornoInteresse) {
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}/excluirCliente")

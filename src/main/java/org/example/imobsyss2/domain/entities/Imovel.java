@@ -3,18 +3,24 @@ package org.example.imobsyss2.domain.entities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.example.imobsyss2.application.dtos.EnumStatusImovel;
 import org.example.imobsyss2.application.dtos.ImovelRequest;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Imovel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     private String endereco;
@@ -35,7 +41,12 @@ public class Imovel {
 
     private String proprietario;
 
-    private Long empresa_id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
+    private Empresa empresa;
+
+    @ManyToMany(mappedBy = "imoveis")
+    private Set<Cliente> clientes = new HashSet<>();
 
     public void setEndereco(String endereco) {
         if(endereco == null || endereco.isBlank()){

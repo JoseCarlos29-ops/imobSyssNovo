@@ -1,7 +1,9 @@
 package org.example.imobsyss2.application.services;
 
 import org.example.imobsyss2.application.dtos.*;
+import org.example.imobsyss2.domain.entities.Empresa;
 import org.example.imobsyss2.domain.entities.Imovel;
+import org.example.imobsyss2.domain.repository.EmpresaRepository;
 import org.example.imobsyss2.domain.repository.ImovelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,13 +17,33 @@ public class ImovelService {
     @Autowired
     private ImovelRepository imovelRepository;
 
+    @Autowired
+    private EmpresaRepository empresaRepository;
+
     public UsuarioLogado getUsuarioLogado(){
         return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    private Empresa buscarEmpresaDoUsuarioLogado() {
+        var empresaId = getUsuarioLogado().empresa_id();
+        if (empresaId == null) {
+            return null;
+        }
+        return empresaRepository.findById(empresaId).orElse(null);
+    }
+
     public List<ImovelResponse> listarTodos() {
 
-        return imovelRepository.findAll()
+        var usuarioLogado = getUsuarioLogado();
+
+        if (usuarioLogado.empresa_id() == null) {
+            return imovelRepository.findAll()
+                    .stream()
+                    .map(ImovelResponse::new)
+                    .toList();
+        }
+
+        return imovelRepository.getImoveisByEmpresa_Id(usuarioLogado.empresa_id())
                 .stream()
                 .map(ImovelResponse::new)
                 .toList();
@@ -39,10 +61,8 @@ public class ImovelService {
 
     public ImovelResponse criar(ImovelRequest request) {
 
-        var usuarioLogado = getUsuarioLogado();
-
         Imovel imovelBanco = new Imovel(request);
-        imovelBanco.setEmpresa_id(usuarioLogado.empresa_id());
+        imovelBanco.setEmpresa(buscarEmpresaDoUsuarioLogado());
         imovelRepository.save(imovelBanco);
 
         return new ImovelResponse(imovelBanco);
@@ -61,8 +81,6 @@ public class ImovelService {
 
     public ImovelResponse atualizar(Long id, ImovelRequest request) {
 
-        var usuarioLogado = getUsuarioLogado();
-
         Imovel imovelBanco = imovelRepository.findById(id).orElse(null);
         if(imovelBanco != null){
             imovelBanco.setEndereco(request.endereco());
@@ -73,7 +91,6 @@ public class ImovelService {
             imovelBanco.setBanheiros(request.banheiros());
             imovelBanco.setDescricao(request.descricao());
             imovelBanco.setProprietario(request.proprietario());
-            imovelBanco.setEmpresa_id(usuarioLogado.empresa_id());
             imovelRepository.save(imovelBanco);
             return new ImovelResponse(imovelBanco);
         }

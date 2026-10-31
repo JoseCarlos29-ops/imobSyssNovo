@@ -52,12 +52,6 @@ public class UsuarioService {
                 .toList();
     }
 
-     return usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
-             .stream()
-                .map(UsuarioResponse::new)
-                .toList();
-}
-
     public CriarAdminResponse criarAdmin(CriarAdminRequest criarAdminRequest) {
 
         if(!criarAdminRequest.secretKey().equals(secret)){
@@ -69,6 +63,15 @@ public class UsuarioService {
         usuarioRepository.save(usuarioAdminSalvar);
 
         return new CriarAdminResponse(usuarioAdminSalvar.getId(),"Usuario Salvo com sucesso!");
+    }
+
+    public UsuarioResponse criarCorretor(UsuarioRequest usuario) {
+
+        Usuario corretor = new Usuario(usuario);
+        corretor.setRole("ROLE_CORRETOR");
+        usuarioRepository.save(corretor);
+
+        return new UsuarioResponse(corretor);
     }
 
     public UsuarioLogado getUsuarioLogado(){
@@ -92,7 +95,6 @@ public class UsuarioService {
                 usuarioBanco.setCpf(new CPF(usuario.cpf()));
                 usuarioBanco.setEmail(usuario.email());
                 usuarioBanco.setSenha(usuario.senha());
-                usuarioBanco.setEmpresa_id(usuarioLogado.empresa_id());
                 usuarioRepository.save(usuarioBanco);
                 return  new UsuarioResponse(usuarioBanco);
             }
@@ -124,6 +126,19 @@ public class UsuarioService {
         }
         return false;
 
+    }
+
+    public UsuarioResponse BuscarUsuarioLogado() {
+        try {
+            var usuarioLogado = getUsuarioLogado();
+            return usuarioRepository.findById(usuarioLogado.id())
+                    .stream()
+                    .map(UsuarioResponse::new).findFirst().orElse(null);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar usuario logado!");
+
+        }
     }
 
 }

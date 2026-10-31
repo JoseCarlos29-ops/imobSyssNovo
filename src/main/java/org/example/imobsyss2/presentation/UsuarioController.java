@@ -41,6 +41,17 @@ public class UsuarioController {
 
     }
 
+    @PostMapping("/corretor")
+    @Operation(summary = "Criar corretor", description = "Cria um usuario com a role ROLE_CORRETOR")
+    public ResponseEntity<?> criarCorretor(@RequestBody UsuarioRequest usuario){
+
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.criarCorretor(usuario));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id){
 
