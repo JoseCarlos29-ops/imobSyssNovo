@@ -1,30 +1,34 @@
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
+'use client'
 import Footer from "../components/Footer";
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function SistemaLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-screen w-full bg-stone-100 font-sans antialiased">
-      
-      {/* Sidebar fixada na lateral ocupando toda a altura */}
-      <Sidebar />
+export default function SistemaLayout({children}){
 
-      {/* Área à direita do menu */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[radial-gradient(ellipse_at_top_left,rgba(120,53,15,0.08),transparent_50%),linear-gradient(to_bottom_right,#fafaf9,#f5f5f4)]">
-        
-        {/* Topbar no topo da área principal */}
-        <Header />
+    const usuario = useSelector((state:RootState)=> state.auth.usuario);
 
-        {/* Conteúdo da página */}
-        <main className="flex-1 p-6 md:p-8">
-          {children}
-        </main>
+    const router = useRouter();
 
-        {/* Rodapé preto no final */}
-        <Footer />
+    useEffect(()=>{
+        if(usuario == null){
+            router.push("/login");
+        }
+    })
 
-      </div>
-
-    </div>
-  );
+    return (
+        <div className="flex min-h-screen bg-blue-50 text-slate-800">
+            <Sidebar />
+            <div className="flex flex-col flex-1 min-w-0">
+                <Header />
+                <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+                    {children}
+                </main>
+                <Footer />
+            </div>
+        </div>
+    );
 }

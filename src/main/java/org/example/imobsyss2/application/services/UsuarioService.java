@@ -36,13 +36,27 @@ public class UsuarioService {
     }
 
 
-    public List<UsuarioResponse> listarTodosUsuariosTable(){
+    public List<UsuarioResponse> listarTodosUsuariosTable() {
+        var usuarioLogado = getUsuarioLogado();
 
-        return  usuarioRepository.findAll()
+        if (usuarioLogado.empresa_id() == null) {
+            return usuarioRepository.findAll()
+                    .stream()
+                    .map(UsuarioResponse::new)
+                    .toList();
+        }
+
+        return usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
                 .stream()
                 .map(UsuarioResponse::new)
                 .toList();
     }
+
+     return usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
+             .stream()
+                .map(UsuarioResponse::new)
+                .toList();
+}
 
     public CriarAdminResponse criarAdmin(CriarAdminRequest criarAdminRequest) {
 
