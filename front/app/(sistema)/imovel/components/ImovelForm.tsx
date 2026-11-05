@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Imovel, ImovelFormProps } from "@/app/types/imovel";
 import Link from "next/link";
 import { useState } from "react";
+import { atualizarImovel, salvarImovel } from "@/app/services/imovelService";
 
 export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
 
@@ -13,43 +14,41 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
 
 
 
-  const handlerSalvar = async (formData: FormData) => {
+  const handlerSalvar = async (formData : FormData) => {
 
-    if (imovelExistente) {
-
-      var dadosRetorno = await axios.put<number>('http://localhost:8080/imoveis/' + imovel.id + '/atualizarImovel', imovel);
-
-      if (dadosRetorno.status == 200) {
-
-        alert("Imóvel foi salvo com sucesso");
-
-      } else {
-
-        alert(dadosRetorno.data)
-        return;
+    try {
+      if(imovelExistente){
+  
+        const dadosRetorno = await atualizarImovel(imovel);
+  
+        if(dadosRetorno){
+          alert("Imóvel foi salvo com sucesso");
+        }else{
+          alert("Erro ao atualizar Imóvel!");
+          return;
+        }
+  
+      }else{
+  
+        const dadosRetorno = await salvarImovel(imovel);
+  
+        if(dadosRetorno){
+          alert("Imóvel foi salvo com sucesso");
+        }else{
+          alert("Erro ao salvar Imóvel!");
+          return;
+        }
+  
       }
-
-      router.push("/imovel")
-
-    } else {
-
-      var dadosRetorno = await axios.post<number>('http://localhost:8080/imoveis', imovel);
-
-      if (dadosRetorno.status == 200) {
-
-        alert("Imóvel foi salvo com sucesso");
-
-      } else {
-
-        alert(dadosRetorno.data)
-        return;
-      }
-
-      router.push("/imovel")
-
+    } catch (error) {
+      // mostra a mensagem de validacao que vem do back (ex.: "CPF Invalido!")
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao salvar Imóvel!");
+      return;
     }
+  
+    router.push("/imovel")
   }
-
 
       const handlerChange = (campos: 'endereco' | 'tipo' | 'valor' | 'area' | 'quartos' | 'banheiros' | 'descricao' | 'status' | 'proprietario', valor: string) => {
         setImovel(valorAnterior => new Imovel(

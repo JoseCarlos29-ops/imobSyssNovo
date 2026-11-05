@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Contrato, ContratoFormProps } from "@/app/types/contrato";
 import Link from "next/link";
 import { useState } from "react";
+import { atualizarContrato, salvarContrato } from "@/app/services/contratoService";
 
 const timestampParaInputDate = (timestamp: number) => {
   if (!timestamp) return "";
@@ -18,42 +19,40 @@ export default function ContratoForm({ contratoExistente }: ContratoFormProps) {
   const [contrato, setContrato] = useState<Contrato>(contratoExistente || new Contrato(null, "", 0, 0, 0, "ATIVO"));
 
 
+  const handlerSalvar = async (formData : FormData) => {
 
-  const handlerSalvar = async (formData: FormData) => {
-
-    if (contratoExistente) {
-
-      var dadosRetorno = await axios.put<number>('http://localhost:8080/contratos/' + contrato.id + '/atualizarContratos', contrato);
-
-      if (dadosRetorno.status == 200) {
-
-        alert("Contrato foi salvo com sucesso");
-
-      } else {
-
-        alert(dadosRetorno.data)
-        return;
+    try {
+      if(contratoExistente){
+  
+        const dadosRetorno = await atualizarContrato(contrato);
+  
+        if(dadosRetorno){
+          alert("Contrato foi salvo com sucesso");
+        }else{
+          alert("Erro ao atualizar Contrato!");
+          return;
+        }
+  
+      }else{
+  
+        const dadosRetorno = await salvarContrato(contrato);
+  
+        if(dadosRetorno){
+          alert("Contrato foi salvo com sucesso");
+        }else{
+          alert("Erro ao salvar Contrato!");
+          return;
+        }
+  
       }
-
-      router.push("/contratos")
-
-    } else {
-
-      var dadosRetorno = await axios.post<number>('http://localhost:8080/contratos', contrato);
-
-      if (dadosRetorno.status == 200) {
-
-        alert("Contrato foi salvo com sucesso");
-
-      } else {
-
-        alert(dadosRetorno.data)
-        return;
-      }
-
-      router.push("/contratos")
-
+    } catch (error) {
+      // mostra a mensagem de validacao que vem do back (ex.: "CPF Invalido!")
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao salvar Contrato!");
+      return;
     }
+  
+    router.push("/contratos")
   }
 
   const handlerChange = (campos: 'tipo' | 'valorContrato' | 'valorComissao' | 'dataContrato' | 'statusContrato', valor: string) => {

@@ -3,6 +3,8 @@ import { Imovel } from "@/app/types/imovel";
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import api from "@/app/services/api";
+import { atualizarStatusImovel, buscarListaImoveis, deletarImovel } from "@/app/services/imovelService";
 
 export default function Imoveis() {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
@@ -13,8 +15,8 @@ export default function Imoveis() {
 
   const carregarDados = async () => {
     try {
-      const dados = await axios.get<Imovel[]>("http://localhost:8080/imoveis");
-      setImoveis(dados.data);
+      const dados = await buscarListaImoveis();
+      setImoveis(dados);
     } catch (error) {
       alert("Erro ao carregar dados!");
     }
@@ -22,15 +24,17 @@ export default function Imoveis() {
 
   const handleDeletarImovel = async (imovel: Imovel) => {
 
-    var dadosRetorno = await axios.delete('http://localhost:8080/imoveis/' + imovel.id + '/excluirImovel');
+    try {
+      var dadosRetorno = await deletarImovel(imovel.id || 0);
 
-    if (dadosRetorno.status == 200) {
-
-      alert("Imóvel foi deletado com sucesso");
-
-    } else {
-
-      alert(dadosRetorno.data)
+      if (dadosRetorno == 200) {
+        alert("Imóvel foi deletado com sucesso");
+      } else {
+        alert("Erro ao excluir imóvel!");
+        return;
+      }
+    } catch (error) {
+      alert("Erro ao excluir imóvel!");
       return;
     }
 
@@ -38,24 +42,12 @@ export default function Imoveis() {
 
   }
 
-  const proximoStatus = (statusAtual: string) => {
-    if (statusAtual === "DISPONIVEL") return "ALUGADO";
-    if (statusAtual === "ALUGADO") return "VENDIDO";
-    return "DISPONIVEL";
-  }
-
   const handleAlterarStatusImovel = async (imovel: Imovel) => {
 
-    var novoStatus = { statusImovel: proximoStatus(imovel.status) };
-
-    var dadosRetorno = await
-      axios.patch('http://localhost:8080/imoveis/' + imovel.id + '/statusImovel', novoStatus);
-
-    if (dadosRetorno.status == 200) {
-      alert("Status atualizado com sucesso!");
-    } else {
-      alert(dadosRetorno.data);
-
+    try {
+      await atualizarStatusImovel(imovel);
+    } catch (error) {
+      alert("Erro ao atualizar status!");
       return;
     }
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ImovelForm from "../../components/ImovelForm";
+import { consultaImovelPorId } from "@/app/services/imovelService";
 
 export default function EditarImovel() {
 
@@ -24,11 +25,15 @@ export default function EditarImovel() {
 
     const buscarDados = async () => {
 
-        const valorImovelBack = await axios.get<Imovel>('http://localhost:8080/imoveis/' + codigo);
+        try {
+            const valorImovelBack = await consultaImovelPorId(codigo);
 
-        if (valorImovelBack.status == 200) {
-            setImovel(valorImovelBack.data);
-        } else {
+            if (valorImovelBack) {
+                setImovel(valorImovelBack);
+            } else {
+                router.push("/imovel")
+            }
+        } catch (error) {
             router.push("/imovel")
         }
 

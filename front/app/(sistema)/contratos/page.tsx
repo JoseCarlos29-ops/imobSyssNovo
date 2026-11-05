@@ -3,6 +3,8 @@ import { Contrato } from "@/app/types/contrato";
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import api from "@/app/services/api";
+import { atualizarStatusContrato, buscarListaContratos, deletarContrato } from "@/app/services/contratoService";
 
 export default function Contratos() {
   const [contratos, setContratos] = useState<Contrato[]>([]);
@@ -13,8 +15,8 @@ export default function Contratos() {
 
   const carregarDados = async () => {
     try {
-      const dados = await axios.get<Contrato[]>("http://localhost:8080/contratos");
-      setContratos(dados.data);
+      const dados = await buscarListaContratos();
+      setContratos(dados);
     } catch (error) {
       alert("Erro ao carregar dados!");
     }
@@ -22,15 +24,17 @@ export default function Contratos() {
 
   const handleDeletarContrato = async (contrato: Contrato) => {
 
-    var dadosRetorno = await axios.delete('http://localhost:8080/contratos/' + contrato.id + '/excluirContrato');
+    try {
+      var dadosRetorno = await deletarContrato(contrato.id || 0);
 
-    if (dadosRetorno.status == 200) {
-
-      alert("Contrato foi deletado com sucesso");
-
-    } else {
-
-      alert(dadosRetorno.data)
+      if (dadosRetorno == 200) {
+        alert("Contrato foi deletado com sucesso");
+      } else {
+        alert("Erro ao excluir contrato!");
+        return;
+      }
+    } catch (error) {
+      alert("Erro ao excluir contrato!");
       return;
     }
 
@@ -38,30 +42,16 @@ export default function Contratos() {
 
   }
 
-  const proximoStatus = (statusAtual: string) => {
-    if (statusAtual === "ATIVO") return "ENCERRADO";
-    if (statusAtual === "ENCERRADO") return "CANCELADO";
-    return "ATIVO";
-  }
-
   const handleAlterarStatusContrato = async (contrato: Contrato) => {
 
-    const novoStatus = { statusContrato: proximoStatus(contrato.statusContrato) };
-
     try {
-      var dadosRetorno = await axios.patch('http://localhost:8080/contratos/' + contrato.id + '/AtualizarStatusContrato', novoStatus);
-
-      if (dadosRetorno.status == 200) {
-        alert("Status atualizado com sucesso!");
-      } else {
-        alert(dadosRetorno.data);
-        return;
-      }
-
-      carregarDados();
+      await atualizarStatusContrato(contrato);
     } catch (error) {
       alert("Erro ao atualizar status!");
+      return;
     }
+
+    carregarDados();
 
   }
 

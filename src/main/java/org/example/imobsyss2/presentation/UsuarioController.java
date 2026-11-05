@@ -27,12 +27,16 @@ public class UsuarioController {
 
         return  ResponseEntity.ok(usuarioService.listarTodosUsuariosTable());
     }
-
     @PostMapping("/admin")
     public ResponseEntity<CriarAdminResponse> criarAdmin(@RequestBody CriarAdminRequest criarAdminRequest){
 
         try{
             CriarAdminResponse respostaSalvar = usuarioService.criarAdmin(criarAdminRequest);
+
+            if(respostaSalvar.id() == 0L){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(respostaSalvar);
+            }
+
             return ResponseEntity.ok(respostaSalvar);
 
         } catch (RuntimeException e) {

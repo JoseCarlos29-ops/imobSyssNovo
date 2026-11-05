@@ -63,6 +63,12 @@ export async function  salvarUsuario (usuario:Usuario): Promise<number>{
     return dadosRetorno.data;
 }
 
+export async function  salvarCorretor (usuario:Usuario): Promise<number>{
+    var dadosRetorno = await  
+    api.post<number>('/usuarios/corretor',usuario);
+    return dadosRetorno.data;
+}
+
 
 
 export async function buscarUsuarioLogado() : Promise<Usuario>{

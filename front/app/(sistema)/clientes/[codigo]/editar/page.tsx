@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ClienteForm from "../../components/ClienteForm";
+import { consultaClientePorId } from "@/app/services/clienteService";
 
 export default function EditarCliente() {
 
@@ -24,11 +25,15 @@ export default function EditarCliente() {
 
     const buscarDados = async () => {
 
-        const valorClienteBack = await axios.get<Cliente>('http://localhost:8080/clientes/' + codigo);
+        try {
+            const valorClienteBack = await consultaClientePorId(codigo);
 
-        if (valorClienteBack.status == 200) {
-            setCliente(valorClienteBack.data);
-        } else {
+            if (valorClienteBack) {
+                setCliente(valorClienteBack);
+            } else {
+                router.push("/clientes")
+            }
+        } catch (error) {
             router.push("/clientes")
         }
 

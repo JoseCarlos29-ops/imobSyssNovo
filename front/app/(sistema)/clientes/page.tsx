@@ -1,8 +1,10 @@
 "use client"
 import { Cliente } from "@/app/types/clientes";
-import axios from "axios";
+import api from "@/app/services/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import { atualizarStatusCliente, buscarListaClientes, deletarCliente } from "@/app/services/clienteService";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -13,8 +15,8 @@ export default function Clientes() {
 
   const carregarDados = async () => {
     try {
-      const dados = await axios.get<Cliente[]>("http://localhost:8080/clientes");
-      setClientes(dados.data);
+      const dados = await buscarListaClientes();
+      setClientes(dados);
     } catch (error) {
       alert("Erro ao carregar dados!");
     }
@@ -22,15 +24,17 @@ export default function Clientes() {
 
   const handleDeletarCliente = async (cliente: Cliente) => {
 
-    var dadosRetorno = await axios.delete('http://localhost:8080/clientes/' + cliente.id + '/excluirCliente');
+    try {
+      var dadosRetorno = await deletarCliente(cliente.id || 0);
 
-    if (dadosRetorno.status == 200) {
-
-      alert("Cliente foi deletado com sucesso");
-
-    } else {
-
-      alert(dadosRetorno.data)
+      if (dadosRetorno == 200) {
+        alert("Cliente foi deletado com sucesso");
+      } else {
+        alert("Erro ao excluir cliente!");
+        return;
+      }
+    } catch (error) {
+      alert("Erro ao excluir cliente!");
       return;
     }
 
@@ -40,29 +44,16 @@ export default function Clientes() {
 
   const handleAlterarStatusCliente = async (cliente: Cliente) => {
 
-
-    var novoStatus = {};
-    if (cliente.statusCliente === "CLIENTE_ATIVO") {
-      novoStatus = { statusCliente: "BLOQUEADO" }
-    } else {
-      novoStatus = { statusCliente: "CLIENTE_ATIVO" }
-    }
-
-    var dadosRetorno = await
-      axios.patch('http://localhost:8080/clientes/' + cliente.id + '/statusCliente', novoStatus);
-
-    if (dadosRetorno.status == 200) {
-      alert("Atulizado status com sucesso!");
-    } else {
-      alert(dadosRetorno.data);
-
+    try {
+      await atualizarStatusCliente(cliente);
+    } catch (error) {
+      alert("Erro ao atualizar status!");
       return;
     }
 
     carregarDados();
 
   }
-
   return (
     <div className="relative min-h-screen w-full bg-stone-100 p-6 md:p-10 font-sans antialiased overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgba(120,53,15,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(69,26,3,0.1),transparent_50%),linear-gradient(to_bottom_right,#fafaf9,#f5f5f4)]">
 

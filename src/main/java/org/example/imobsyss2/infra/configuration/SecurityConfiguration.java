@@ -30,6 +30,8 @@ public class SecurityConfiguration {
                                 "/swagger-resources/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios/admin")
+                        .permitAll()
                         .requestMatchers(HttpMethod.GET, "/usuarios/buscarusuariologado")
                         .authenticated()
                         .requestMatchers("/usuarios/**")

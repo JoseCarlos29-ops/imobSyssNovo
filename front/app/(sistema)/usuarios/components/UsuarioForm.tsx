@@ -1,13 +1,14 @@
 'use client'
 import axios from "axios";
-import { atualizarUsuario, salvarUsuario } from "@/app/services/usuarioService";
 import { useRouter } from "next/navigation";
 import { Usuario, UsuarioFormProps } from "@/app/types/usuario";
 import Link from "next/link";
 import { useState } from "react";
+import { atualizarUsuario, salvarCorretor, salvarUsuario } from "@/app/services/usuarioService";
 
 export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
   const router = useRouter();
+  const [perfil, setPerfil] = useState<'USER' | 'CORRETOR'>('USER');
 
   const [ usuario,setUsuario ] = useState<Usuario>(
       usuarioExistente ||
@@ -31,33 +32,40 @@ export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
 
   const handlerSalvar = async (formData : FormData) =>{
 
-  if(usuarioExistente){
-      var dadosRetorno = await atualizarUsuario(usuario);
-      if(dadosRetorno){
-          alert("Usuário foi salvo com sucesso!");
+    try {
+      if(usuarioExistente){
+          var dadosRetorno = await atualizarUsuario(usuario);
+          if(dadosRetorno){
+              alert("Usuário foi salvo com sucesso!");
+          }else{
+              alert("Erro ao atualizar Usuário!");
+
+              return;
+          }
+
       }else{
-          alert("Erro ao atualizar Usuário!");
+          var dadosRetorno = perfil === 'CORRETOR'
+              ? await salvarCorretor(usuario)
+              : await salvarUsuario(usuario);
+          if(dadosRetorno){
+              alert("Usuário foi salvo com sucesso!");
+          }else{
+              alert("Erro ao salvar Usuário!");
 
-          return;
+              return;
+          }
+
       }
+    } catch (error) {
+      // mostra a mensagem de validacao que vem do back (ex.: "CPF Invalido!")
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao salvar Usuário!");
+      return;
+    }
 
-
-  }else{
-      var dadosRetorno = await salvarUsuario(usuario);
-      if(dadosRetorno){
-          alert("Usuário foi salvo com sucesso!");
-      }else{
-          alert("Erro ao salvar Usuário!");
-
-          return;
-      }
-  
-  }
-
-  router.push("/usuarios");
+    router.push("/usuarios");
 
   }
-
   return (
 
   
@@ -144,6 +152,24 @@ export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
               className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
             />
           </div>
+
+                    {/* Perfil (somente no cadastro) */}
+                    {!usuarioExistente && (
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                Perfil
+              </label>
+              <select
+                name="perfil"
+                value={perfil}
+                onChange={(e)=> setPerfil(e.target.value as 'USER' | 'CORRETOR')}
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
+              >
+                <option value="USER">Usuário</option>
+                <option value="CORRETOR">Corretor</option>
+              </select>
+            </div>
+          )}
 
           {/* Botões de Ação */}
           <div className="pt-4 flex items-center justify-end gap-3 border-t border-stone-100">

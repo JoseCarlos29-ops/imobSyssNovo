@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ContratoForm from "../../components/ContratoForm";
+import { consultaContratoPorId } from "@/app/services/contratoService";
 
 export default function EditarContrato() {
 
@@ -24,11 +25,15 @@ export default function EditarContrato() {
 
     const buscarDados = async () => {
 
-        const valorContratoBack = await axios.get<Contrato>('http://localhost:8080/contratos/' + codigo);
+        try {
+            const valorContratoBack = await consultaContratoPorId(codigo);
 
-        if (valorContratoBack.status == 200) {
-            setContrato(valorContratoBack.data);
-        } else {
+            if (valorContratoBack) {
+                setContrato(valorContratoBack);
+            } else {
+                router.push("/contratos")
+            }
+        } catch (error) {
             router.push("/contratos")
         }
 

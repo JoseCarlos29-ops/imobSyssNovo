@@ -12,8 +12,27 @@ export async function buscarListaContratos(): Promise<Contrato[]> {
 }
 
 export async function deletarContrato(id: number): Promise<number> {
-    const dados = await api.delete(`/contratos/${id}/excluir`);
+    const dados = await api.delete(`/contratos/${id}/excluirContrato`);
     return dados.status;
+}
+
+const proximoStatusContrato = (statusAtual: string) => {
+    if (statusAtual === "ATIVO") return "ENCERRADO";
+    if (statusAtual === "ENCERRADO") return "CANCELADO";
+    return "ATIVO";
+}
+
+export async function atualizarStatusContrato(contrato: Contrato): Promise<void> {
+
+    const novoStatus = { statusContrato: proximoStatusContrato(contrato.statusContrato) };
+
+    const dadosRetorno = await api.patch(`/contratos/${contrato.id}/AtualizarStatusContrato`, novoStatus);
+
+    if (dadosRetorno.status == 200) {
+        alert("Status atualizado com sucesso!");
+    } else {
+        alert(dadosRetorno.data);
+    }
 }
 
 export async function consultaContratoPorId(id: number): Promise<Contrato> {
@@ -22,7 +41,7 @@ export async function consultaContratoPorId(id: number): Promise<Contrato> {
 }
 
 export async function atualizarContrato(contrato: Contrato): Promise<number> {
-    const dadosRetorno = await api.put<number>(`/contratos/${contrato.id}`, contrato);
+    const dadosRetorno = await api.put<number>(`/contratos/${contrato.id}/atualizarContratos`, contrato);
     return dadosRetorno.data;
 }
 

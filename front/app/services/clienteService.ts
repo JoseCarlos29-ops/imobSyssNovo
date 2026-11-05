@@ -12,8 +12,26 @@ export async function buscarListaClientes(): Promise<Cliente[]> {
 }
 
 export async function deletarCliente(id: number): Promise<number> {
-    const dados = await api.delete(`/clientes/${id}/excluir`);
+    const dados = await api.delete(`/clientes/${id}/excluirCliente`);
     return dados.status;
+}
+
+export async function atualizarStatusCliente(cliente: Cliente): Promise<void> {
+
+    var novoStatus = {};
+    if (cliente.statusCliente === "CLIENTE_ATIVO") {
+        novoStatus = { statusCliente: "BLOQUEADO" }
+    } else {
+        novoStatus = { statusCliente: "CLIENTE_ATIVO" }
+    }
+
+    const dadosRetorno = await api.patch(`/clientes/${cliente.id}/statusCliente`, novoStatus);
+
+    if (dadosRetorno.status == 200) {
+        alert("Atulizado status com sucesso!");
+    } else {
+        alert(dadosRetorno.data);
+    }
 }
 
 export async function consultaClientePorId(id: number): Promise<Cliente> {
@@ -22,7 +40,7 @@ export async function consultaClientePorId(id: number): Promise<Cliente> {
 }
 
 export async function atualizarCliente(cliente: Cliente): Promise<number> {
-    const dadosRetorno = await api.put<number>(`/clientes/${cliente.id}`, cliente);
+    const dadosRetorno = await api.put<number>(`/clientes/${cliente.id}/atualizarCliente`, cliente);
     return dadosRetorno.data;
 }
 

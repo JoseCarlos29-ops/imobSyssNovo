@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Cliente, ClienteFormProps } from "@/app/types/clientes";
 import Link from "next/link";
 import { useState } from "react";
+import { atualizarCliente, salvarCliente } from "@/app/services/clienteService";
 
 export default function ClienteForm({clienteExistente} : ClienteFormProps) {
 
@@ -14,44 +15,41 @@ export default function ClienteForm({clienteExistente} : ClienteFormProps) {
   
 
 
-const handlerSalvar = async (formData : FormData) => {
+  const handlerSalvar = async (formData : FormData) => {
 
-  if(clienteExistente){
-
-    var dadosRetorno = await axios.put<number>( 'http://localhost:8080/clientes/' +cliente.id+ '/atualizarImovel', cliente);
-
-  if(dadosRetorno.status ==200){
+    try {
+      if(clienteExistente){
   
-    alert("Cliente foi salvo com sucesso");
-    
-  }else{
-
-    alert(dadosRetorno.data)
-    return;
-  }
-
-  router.push("/clientes")
-
-
-
-  }else{
-
-  var dadosRetorno = await axios.post<number>( 'http://localhost:8080/clientes', cliente);
-
-  if(dadosRetorno.status ==200){
+        const dadosRetorno = await atualizarCliente(cliente);
   
-    alert("Cliente foi salvo com sucesso");
-    
-  }else{
-
-    alert(dadosRetorno.data)
-    return;
+        if(dadosRetorno){
+          alert("Cliente foi salvo com sucesso");
+        }else{
+          alert("Erro ao atualizar Cliente!");
+          return;
+        }
+  
+      }else{
+  
+        const dadosRetorno = await salvarCliente(cliente);
+  
+        if(dadosRetorno){
+          alert("Cliente foi salvo com sucesso");
+        }else{
+          alert("Erro ao salvar Cliente!");
+          return;
+        }
+  
+      }
+    } catch (error) {
+      // mostra a mensagem de validacao que vem do back (ex.: "CPF Invalido!")
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao salvar Cliente!");
+      return;
+    }
+  
+    router.push("/clientes")
   }
-
-  router.push("/clientes")
-
-}
-}
 
   const handlerChange = ( campos: 'nome' | 'cpf' | 'email' | 'telefone' | 'endereco' | 'statusCliente', valor:string) => {
     setCliente(valorAnterior => new Cliente(

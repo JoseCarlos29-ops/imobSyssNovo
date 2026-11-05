@@ -25,12 +25,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String uri  = request.getRequestURI();
 
+        // O app desktop cria o primeiro admin sem token (protegido pela secretKey no corpo)
+        boolean criarAdminDesktop = uri.equals("/usuarios/admin") && request.getMethod().equals("POST");
+
         if(uri.startsWith("/swagger-ui")
                 || uri.startsWith("/v2/api-docs")
                 || uri.startsWith("/v3/api-docs")
                 || uri.startsWith("/swagger-resources")
-                || uri.startsWith("webjars")
+                || uri.startsWith("/webjars")
                 || uri.startsWith("/auth/login")
+                || criarAdminDesktop
         ){
             filterChain.doFilter(request,response);
             return;

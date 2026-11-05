@@ -2,7 +2,9 @@ package org.example.imobsyss2.application.services;
 
 import org.example.imobsyss2.application.dtos.*;
 import org.example.imobsyss2.application.services.TokenService;
+import org.example.imobsyss2.domain.entities.Empresa;
 import org.example.imobsyss2.domain.entities.Usuario;
+import org.example.imobsyss2.domain.repository.EmpresaRepository;
 import org.example.imobsyss2.domain.repository.UsuarioRepository;
 import org.example.imobsyss2.domain.valueObject.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private EmpresaRepository empresaRepository;
 
     @Autowired
     private TokenService tokenService;
@@ -55,7 +60,7 @@ public class UsuarioService {
     public CriarAdminResponse criarAdmin(CriarAdminRequest criarAdminRequest) {
 
         if(!criarAdminRequest.secretKey().equals(secret)){
-            return new CriarAdminResponse(0L,"Usuario Salvo com sucesso!");
+            return new CriarAdminResponse(0L,"Chave secreta invalida!");
 
         }
 
@@ -69,6 +74,7 @@ public class UsuarioService {
 
         Usuario corretor = new Usuario(usuario);
         corretor.setRole("ROLE_CORRETOR");
+        corretor.setEmpresa(buscarEmpresaDoUsuarioLogado());
         usuarioRepository.save(corretor);
 
         return new UsuarioResponse(corretor);
@@ -78,12 +84,21 @@ public class UsuarioService {
         return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    private Empresa buscarEmpresaDoUsuarioLogado() {
+        var empresaId = getUsuarioLogado().empresa_id();
+        if (empresaId == null) {
+            return null;
+        }
+        return empresaRepository.findById(empresaId).orElse(null);
+    }
+
     public UsuarioResponse salvarUsuario(UsuarioRequest usuario, Long id) {
 
         var usuarioLogado = getUsuarioLogado();
         //Novo Usuario
         if(id == 0L) {
             Usuario usuarioBanco = new Usuario(usuario);
+            usuarioBanco.setEmpresa(buscarEmpresaDoUsuarioLogado());
             usuarioRepository.save(usuarioBanco);
 
             return new UsuarioResponse(usuarioBanco);
