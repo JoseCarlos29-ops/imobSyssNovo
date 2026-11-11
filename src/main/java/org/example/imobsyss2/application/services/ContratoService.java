@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ContratoService {
@@ -32,6 +33,18 @@ public class ContratoService {
         return empresaRepository.findById(empresaId).orElse(null);
     }
 
+
+    // Multilocacao: usuario com empresa so enxerga/altera registros da propria empresa.
+    // Usuario sem empresa (admin geral) enxerga tudo.
+    private Optional<Contrato> buscarNaEmpresa(Long id) {
+        var empresaId = getUsuarioLogado().empresa_id();
+
+        if (empresaId == null) {
+            return contratoRepository.findById(id);
+        }
+        return contratoRepository.findByIdAndEmpresa_Id(id, empresaId);
+    }
+
     public List<ContratoResponse> listarTodos() {
 
         var usuarioLogado = getUsuarioLogado();
@@ -51,7 +64,7 @@ public class ContratoService {
 
     public ContratoResponse buscarPorId(Long id) {
 
-        var contrato = contratoRepository.findById(id).orElse(null);
+        var contrato = buscarNaEmpresa(id).orElse(null);
         if(contrato == null){
             return null;
         }
@@ -70,7 +83,7 @@ public class ContratoService {
 
     public boolean atualizarStatusContrato(Long id, AtualizarStatusContrato request) {
 
-        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
+        Contrato contratoBanco = buscarNaEmpresa(id).orElse(null);
         if(contratoBanco != null){
             contratoBanco.setStatusContrato(request.statusContrato());
             contratoRepository.save(contratoBanco);
@@ -81,7 +94,7 @@ public class ContratoService {
 
     public ContratoResponse atualizar(Long id, ContratoRequest request) {
 
-        Contrato contratoBanco = contratoRepository.findById(id).orElse(null);
+        Contrato contratoBanco = buscarNaEmpresa(id).orElse(null);
         if(contratoBanco != null){
             contratoBanco.setTipo(request.tipo());
             contratoBanco.setValorContrato(request.valorContrato());

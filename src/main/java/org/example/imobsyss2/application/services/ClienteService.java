@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClienteService {
@@ -38,6 +39,27 @@ public class ClienteService {
         return empresaRepository.findById(empresaId).orElse(null);
     }
 
+
+    // Multilocacao: usuario com empresa so enxerga/altera registros da propria empresa.
+    // Usuario sem empresa (admin geral) enxerga tudo.
+    private Optional<Cliente> buscarNaEmpresa(Long id) {
+        var empresaId = getUsuarioLogado().empresa_id();
+
+        if (empresaId == null) {
+            return clienteRepository.findById(id);
+        }
+        return clienteRepository.findByIdAndEmpresa_Id(id, empresaId);
+    }
+
+    private Optional<Imovel> buscarImovelNaEmpresa(Long imovelId) {
+        var empresaId = getUsuarioLogado().empresa_id();
+
+        if (empresaId == null) {
+            return imovelRepository.findById(imovelId);
+        }
+        return imovelRepository.findByIdAndEmpresa_Id(imovelId, empresaId);
+    }
+
     public List<ClienteResponse> listarTodos() {
 
         var usuarioLogado = getUsuarioLogado();
@@ -57,7 +79,7 @@ public class ClienteService {
 
     public ClienteResponse buscarPorId(Long id) {
 
-        var cliente = clienteRepository.findById(id).orElse(null);
+        var cliente = buscarNaEmpresa(id).orElse(null);
         if(cliente == null){
             return null;
         }
@@ -76,7 +98,7 @@ public class ClienteService {
 
     public boolean atualizarStatusCliente(Long id, AtualizarStatusCliente request) {
 
-        Cliente clienteBanco = clienteRepository.findById(id).orElse(null);
+        Cliente clienteBanco = buscarNaEmpresa(id).orElse(null);
         if(clienteBanco != null){
             clienteBanco.setStatusCliente(request.statusCliente());
             clienteRepository.save(clienteBanco);
@@ -87,7 +109,7 @@ public class ClienteService {
 
     public ClienteResponse atualizar(Long id, ClienteRequest request) {
 
-        Cliente clienteBanco = clienteRepository.findById(id).orElse(null);
+        Cliente clienteBanco = buscarNaEmpresa(id).orElse(null);
         if(clienteBanco != null){
             clienteBanco.setNome(request.nome());
             clienteBanco.setCpf(new CPF(request.cpf()));
@@ -108,8 +130,8 @@ public class ClienteService {
 
     public boolean registrarInteresse(Long id, InteresseRequest interesseRequest) {
 
-        Cliente clienteBanco = clienteRepository.findById(id).orElse(null);
-        Imovel imovelBanco = imovelRepository.findById(interesseRequest.imovel_id()).orElse(null);
+        Cliente clienteBanco = buscarNaEmpresa(id).orElse(null);
+        Imovel imovelBanco = buscarImovelNaEmpresa(interesseRequest.imovel_id()).orElse(null);
         if (clienteBanco != null && imovelBanco != null) {
 
             var imovel = clienteBanco.getImoveis().stream()

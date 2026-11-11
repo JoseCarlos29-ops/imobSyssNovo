@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -41,6 +42,18 @@ public class UsuarioService {
     }
 
 
+
+    // Multilocacao: usuario com empresa so enxerga/altera registros da propria empresa.
+    // Usuario sem empresa (admin geral) enxerga tudo.
+    private Optional<Usuario> buscarNaEmpresa(Long id) {
+        var empresaId = getUsuarioLogado().empresa_id();
+
+        if (empresaId == null) {
+            return usuarioRepository.findById(id);
+        }
+        return usuarioRepository.findByIdAndEmpresa_Id(id, empresaId);
+    }
+
     public List<UsuarioResponse> listarTodosUsuariosTable() {
         var usuarioLogado = getUsuarioLogado();
 
@@ -65,6 +78,17 @@ public class UsuarioService {
         }
 
         Usuario usuarioAdminSalvar = new Usuario(criarAdminRequest);
+
+        // Bootstrapping: se o desktop informar o nome da empresa, cria a Empresa e vincula o admin a ela
+        if (criarAdminRequest.nomeEmpresa() != null && !criarAdminRequest.nomeEmpresa().isBlank()) {
+            Empresa empresa = new Empresa();
+            empresa.setRazaoSocial(criarAdminRequest.nomeEmpresa().trim());
+            empresa.setNomeFantasia(criarAdminRequest.nomeEmpresa().trim());
+            empresa.setCnpj(criarAdminRequest.cnpj());
+            empresaRepository.save(empresa);
+            usuarioAdminSalvar.setEmpresa(empresa);
+        }
+
         usuarioRepository.save(usuarioAdminSalvar);
 
         return new CriarAdminResponse(usuarioAdminSalvar.getId(),"Usuario Salvo com sucesso!");
@@ -104,7 +128,7 @@ public class UsuarioService {
             return new UsuarioResponse(usuarioBanco);
         }else {
             //Usuario existente
-            Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
+            Usuario usuarioBanco = buscarNaEmpresa(id).orElse(null);
             if(usuarioBanco!= null ){
                 usuarioBanco.setNome(usuario.nome());
                 usuarioBanco.setCpf(new CPF(usuario.cpf()));
@@ -121,7 +145,7 @@ public class UsuarioService {
 
     public UsuarioResponse buscarPorId(Long id) {
 
-        var usuario = usuarioRepository.findById(id).orElse(null);
+        var usuario = buscarNaEmpresa(id).orElse(null);
         if(usuario == null){
             return null;
         }
@@ -133,7 +157,7 @@ public class UsuarioService {
 
     public boolean atualizarStatus(EnumStatusUsuario status,Long id) {
 
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
+        Usuario usuarioBanco = buscarNaEmpresa(id).orElse(null);
         if(usuarioBanco!= null ){
             usuarioBanco.setStatus(status);
             usuarioRepository.save(usuarioBanco);

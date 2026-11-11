@@ -15,16 +15,16 @@ export default function SistemaLayout({children}){
 
     useEffect(()=>{
         if(usuario == null){
-            router.push("/login");
+            router.push("/");
         }
-    })
+    }, [usuario, router])
 
     return (
-        <div className="flex min-h-screen bg-blue-50 text-slate-800">
+        <div className="flex min-h-screen bg-stone-100 text-stone-800">
             <Sidebar />
             <div className="flex flex-col flex-1 min-w-0">
                 <Header />
-                <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto">
                     {children}
                 </main>
                 <Footer />

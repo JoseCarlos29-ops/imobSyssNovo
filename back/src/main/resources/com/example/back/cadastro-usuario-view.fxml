@@ -11,9 +11,13 @@
       <Label layoutX="78.0" layoutY="97.0" text="CPF" />
       <Label layoutX="78.0" layoutY="137.0" text="Email" />
       <Label layoutX="78.0" layoutY="171.0" text="Senha" />
+      <Label layoutX="62.0" layoutY="209.0" text="Empresa" />
+      <Label layoutX="78.0" layoutY="247.0" text="CNPJ" />
       <TextField fx:id="txtNome" layoutX="123.0" layoutY="52.0" />
       <TextField fx:id="txtCpf" layoutX="123.0" layoutY="93.0" />
       <TextField fx:id="txtEmail" layoutX="123.0" layoutY="133.0" />
       <PasswordField fx:id="txtSenha" layoutX="123.0" layoutY="167.0" />
+      <TextField fx:id="txtEmpresa" layoutX="123.0" layoutY="205.0" promptText="Nome da primeira empresa" />
+      <TextField fx:id="txtCnpj" layoutX="123.0" layoutY="243.0" />
    </children>
 </AnchorPane>

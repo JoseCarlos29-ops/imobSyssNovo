@@ -1,94 +1,311 @@
-'use client'
-
-import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import { useDispatch } from "react-redux";
-import { login } from "./redux/slices/authSlice";
-import { buscarUsuarioLogado } from "./services/usuarioService";
-import { loginBack } from "./services/authService";
+import Link from "next/link";
 
 
-export default function Login(){
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  const handleLogin = async(formData:FormData) =>{
-      try {
-          const emailTela = formData.get("email")?.toString() ?? "";
-          const senhaTela = formData.get("senha")?.toString() ?? "";
-
-          var loginResposta = await loginBack(emailTela,senhaTela);
-
-          if(loginResposta != null){
-              // o token precisa estar no cookie antes de buscar o usuario logado
-              Cookies.set('token',loginResposta.token,{secure: true, expires: 7});
-
-              var usuarioLogado = await buscarUsuarioLogado();
-
-              dispatch(login(
-                  {
-                      token:loginResposta.token,
-                      usuario:{...usuarioLogado}
-                  }
-              ));
-              router.push("/home")
-          }else{
-              alert("Login ou senha Invalido!")
-          }
-      } catch (error) {
-          alert("Login ou senha Invalido!")
+export default function Home() {
+  return (
+    <>
+    {/* Estilos embutidos para teste rápido (ou você pode mover para o seu globals.css) */}
+    <style dangerouslySetInnerHTML={{ __html: `
+      :root {
+          --primary-blue: #0056b3;
+          --primary-dark: #003366;
+          --primary-light: #e6f0fa;
+          --accent-blue: #00a8cc;
+          --text-main: #333333;
+          --text-muted: #666666;
+          --bg-color: #f9fbff;
+          --white: #ffffff;
+          --transition: all 0.3s ease;
       }
-  }
 
-    return (
-      // FUNDO EXTERNO: Adicionados detalhes marcantes em tom marrom quente (amber/stone/marrom) nos cantos e no centro, criando um contraste elegante com o fundo claro.
-      <div className="relative min-h-screen w-full flex items-center justify-center bg-stone-100 p-4 antialiased overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgba(120,53,15,0.25),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(69,26,3,0.2),transparent_50%),radial-gradient(circle_at_center,rgba(217,119,6,0.08),transparent_60%),linear-gradient(to_bottom_right,#fafaf9,#f5f5f4)]">
-        
-        {/* Detalhes/Acentos visuais em marrom flutuando ao fundo */}
-        <div className="absolute top-10 left-10 w-72 h-72 bg-amber-900/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-950/15 rounded-full blur-3xl pointer-events-none" />
-        
-        {/* CARD DE LOGIN:*/}
-        <div className="relative z-10 w-full max-w-md bg-white border border-stone-200/60 rounded-3xl p-10 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.08),inset_0_0_30px_rgba(180,115,70,0.05)] transition-all duration-300">
-          <div>
-            {/* TÍTULO */}
-            <h1 className="text-xl font-semibold text-black text-center mb-10 tracking-tighter">
-              Entrar no sistema
-            </h1>
-          </div>
-          <form action={handleLogin} className="space-y-5">
-            <div>
-              {/* LABEL */}
-              <label className="block text-xs font-medium text-black mb-1.5 uppercase tracking-wider">
-                E-mail
-              </label>
-              {/* INPUT */}
-              <input 
-                name="email" 
-                className="w-full px-5 py-3.5 bg-stone-50/60 border border-stone-200 rounded-xl text-black placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-black focus:border-black/20 transition-all duration-200 placeholder:font-light"
-              />
-            </div>
-  
-            <div>
-              <label className="block text-xs font-medium text-black mb-1.5 uppercase tracking-wider">
-                senha
-              </label>
-              <input 
-                name="senha" 
-                type="password" 
-                className="w-full px-5 py-3.5 bg-stone-50/60 border border-stone-200 rounded-xl text-black placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-black focus:border-black/20 transition-all duration-200 placeholder:font-light"
-              />
-            </div>
-  
-            {/* BOTÃO */}
-            <button 
-              type="submit" 
-              className="w-full h-14 flex items-center justify-center bg-black hover:bg-stone-900 text-white font-medium rounded-xl shadow-lg shadow-black/10 transition-all duration-300 ease-in-out active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black mt-4"
-            >
-              Entrar
-            </button>
-          </form>
-        </div>  
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          font-family: 'Inter', sans-serif;
+          background-color: var(--bg-color);
+          color: var(--text-main);
+          line-height: 1.6;
+      }
+
+      a {
+          text-decoration: none;
+          color: inherit;
+      }
+
+      header {
+          background-color: var(--white);
+          box-shadow: 0 2px 10px rgba(0, 86, 179, 0.05);
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          z-index: 1000;
+      }
+
+      .nav-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 1.2rem 2rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+
+      .logo {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: var(--primary-dark);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+      }
+
+      .logo span {
+          color: var(--accent-blue);
+      }
+
+      .nav-links {
+          display: flex;
+          gap: 2rem;
+          list-style: none;
+          align-items: center;
+      }
+
+      .nav-links a:not(.btn-login) {
+          color: var(--text-muted);
+          font-weight: 600;
+          transition: var(--transition);
+      }
+
+      .nav-links a:not(.btn-login):hover {
+          color: var(--primary-blue);
+      }
+
+      .btn-login {
+          background-color: var(--primary-blue);
+          color: var(--white);
+          padding: 0.6rem 1.5rem;
+          border-radius: 50px;
+          font-weight: 600;
+          transition: var(--transition);
+          box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+      }
+
+      .btn-login:hover {
+          background-color: var(--primary-dark);
+          transform: translateY(-2px);
+      }
+
+      .hero {
+          padding: 10rem 2rem 6rem;
+          max-width: 1200px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 4rem;
+          align-items: center;
+      }
+
+      .hero-content h1 {
+          font-size: 3.2rem;
+          line-height: 1.2;
+          color: var(--primary-dark);
+          margin-bottom: 1.5rem;
+      }
+
+      .hero-content h1 span {
+          color: var(--accent-blue);
+      }
+
+      .hero-content p {
+          font-size: 1.1rem;
+          color: var(--text-muted);
+          margin-bottom: 2.5rem;
+      }
+
+      .hero-buttons {
+          display: flex;
+          gap: 1rem;
+      }
+
+      .btn-primary {
+          background-color: var(--primary-blue);
+          color: var(--white);
+          padding: 0.9rem 2rem;
+          border-radius: 8px;
+          font-weight: 700;
+          transition: var(--transition);
+      }
+
+      .btn-primary:hover {
+          background-color: var(--primary-dark);
+      }
+
+      .hero-card {
+          background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+          border-radius: 20px;
+          padding: 3rem;
+          color: var(--white);
+          box-shadow: 0 20px 40px rgba(0, 51, 102, 0.2);
+          position: relative;
+          overflow: hidden;
+      }
+
+      .hero-card h3 {
+          font-size: 1.8rem;
+          margin-bottom: 1rem;
+      }
+
+      .hero-card p {
+          opacity: 0.9;
+      }
+
+      .about {
+          background-color: var(--white);
+          padding: 6rem 2rem;
+      }
+
+      .about-container {
+          max-width: 900px;
+          margin: 0 auto;
+          text-align: center;
+      }
+
+      .about h2 {
+          font-size: 2.5rem;
+          color: var(--primary-dark);
+          margin-bottom: 1.5rem;
+      }
+
+      .about p {
+          font-size: 1.15rem;
+          color: var(--text-muted);
+          line-height: 1.8;
+          margin-bottom: 3rem;
+      }
+
+      .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 2rem;
+          text-align: left;
+          margin-top: 3rem;
+      }
+
+      .feature-box {
+          background-color: var(--primary-light);
+          padding: 2rem;
+          border-radius: 12px;
+          transition: var(--transition);
+      }
+
+      .feature-box:hover {
+          transform: translateY(-5px);
+      }
+
+      .feature-box h4 {
+          color: var(--primary-dark);
+          margin-bottom: 0.8rem;
+          font-size: 1.2rem;
+      }
+
+      .feature-box p {
+          font-size: 0.95rem;
+          margin-bottom: 0;
+      }
+
+      footer {
+          background-color: var(--primary-dark);
+          color: var(--white);
+          text-align: center;
+          padding: 2rem;
+          font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+          .hero {
+              grid-template-columns: 1fr;
+              text-align: center;
+              padding-top: 8rem;
+          }
+          .hero-buttons {
+              justify-content: center;
+          }
+          .nav-links {
+              display: none;
+          }
+          .hero-content h1 {
+              font-size: 2.5rem;
+          }
+      }
+    `}} />
+
+    {/* Cabeçalho */}
+    <header>
+      <div className="nav-container">
+        <a href="#" className="logo">🏠 Imob<span>Syss</span></a>
+        <ul className="nav-links">
+          <li><a href="#sobre">Nossa História</a></li>
+          <li><a href="#recursos">Recursos</a></li>
+          <li>
+            
+            <Link href="/login" className="btn-login">Entrar</Link>
+          </li>
+
+          
+          
+        </ul>
       </div>
-    );
+    </header>
+
+    {/* Seção Hero */}
+    <main>
+      <section className="hero">
+        <div className="hero-content">
+          <h1>Gestão imobiliária <span>simples e segura</span></h1>
+          <p>Cadastro de clientes, imóveis e contratos, com controle de usuários e acessos, em um só lugar.</p>
+          <div className="hero-buttons">
+            <a href="#sobre" className="btn-primary">Conhecer o Projeto</a>
+          </div>
+        </div>
+        <div className="hero-card">
+          <h3>ImobSyss</h3>
+          <p>Desenvolvido para organizar a rotina da imobiliária, com segurança, agilidade e autonomia.</p>
+        </div>
+      </section>
+
+      {/* Seção Nossa História */}
+      <section className="about" id="sobre">
+        <div className="about-container">
+          <h2>Nossa História</h2>
+          <p>O <strong>ImobSyss</strong> nasceu como um projeto de gestão imobiliária, pensado para ter facilidade de cadastro, controle de perfil de usuário e uma gestão de acessos simples e segura.</p>
+          
+          <div className="features-grid" id="recursos">
+            <div className="feature-box">
+              <h4>Fácil Cadastro</h4>
+              <p>Cadastro rápido e intuitivo de clientes, imóveis e contratos.</p>
+            </div>
+            <div className="feature-box">
+              <h4>Controle de Perfil</h4>
+              <p>Gestão centralizada dos dados de cada empresa e de cada usuário.</p>
+            </div>
+            <div className="feature-box">
+              <h4>Gestão de Acessos</h4>
+              <p>Controle de acesso por perfil: administrador e corretor.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {/* Rodapé */}
+    <footer>
+      <p>&copy; 2026 ImobSyss. Projeto Acadêmico.</p>
+    </footer>
+  </>
+  );
 }

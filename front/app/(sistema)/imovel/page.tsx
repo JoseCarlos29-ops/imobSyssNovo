@@ -1,13 +1,17 @@
 "use client"
 import { Imovel } from "@/app/types/imovel";
-import axios from "axios";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import api from "@/app/services/api";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
+import { setFiltroStatus, setImoveis } from "@/app/redux/slices/imoveisSlice";
 import { atualizarStatusImovel, buscarListaImoveis, deletarImovel } from "@/app/services/imovelService";
 
 export default function Imoveis() {
-  const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  // lista e filtro de status ficam na store do Redux (imoveisSlice)
+  const dispatch = useDispatch();
+  const { lista, filtroStatus } = useSelector((state: RootState) => state.imoveis);
+  const imoveis = lista.filter((i) => filtroStatus === "TODOS" || i.status === filtroStatus);
 
   useEffect(() => {
     carregarDados();
@@ -16,8 +20,12 @@ export default function Imoveis() {
   const carregarDados = async () => {
     try {
       const dados = await buscarListaImoveis();
-      setImoveis(dados);
+      dispatch(setImoveis(dados));
     } catch (error) {
+      // 401: o interceptor ja fez o logout e o layout volta para o login
+      if ((error as { response?: { status?: number } })?.response?.status === 401) {
+        return;
+      }
       alert("Erro ao carregar dados!");
     }
   };
@@ -74,12 +82,26 @@ export default function Imoveis() {
             </p>
           </div>
 
-          <Link
-            href="/imovel/novo"
-            className="inline-flex items-center justify-center px-6 py-3 bg-black hover:bg-stone-900 text-white font-medium text-sm rounded-xl shadow-lg shadow-black/10 transition-all duration-300 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-          >
-            + Novo Imóvel
-          </Link>
+          <div className="flex items-center gap-3">
+            <select
+              value={filtroStatus}
+              onChange={(e) => dispatch(setFiltroStatus(e.target.value))}
+              className="px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10"
+            >
+              <option value="TODOS">Todos os status</option>
+              <option value="DISPONIVEL">Disponível</option>
+              <option value="ALUGADO">Alugado</option>
+              <option value="VENDIDO">Vendido</option>
+              <option value="INDISPONIVEL">Indisponível</option>
+            </select>
+
+            <Link
+              href="/imovel/novo"
+              className="inline-flex items-center justify-center px-6 py-3 bg-black hover:bg-stone-900 text-white font-medium text-sm rounded-xl shadow-lg shadow-black/10 transition-all duration-300 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+            >
+              + Novo Imóvel
+            </Link>
+          </div>
         </div>
 
         {/* Tabela de Imóveis */}

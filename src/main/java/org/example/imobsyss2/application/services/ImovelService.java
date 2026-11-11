@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ImovelService {
@@ -32,6 +33,18 @@ public class ImovelService {
         return empresaRepository.findById(empresaId).orElse(null);
     }
 
+
+    // Multilocacao: usuario com empresa so enxerga/altera registros da propria empresa.
+    // Usuario sem empresa (admin geral) enxerga tudo.
+    private Optional<Imovel> buscarNaEmpresa(Long id) {
+        var empresaId = getUsuarioLogado().empresa_id();
+
+        if (empresaId == null) {
+            return imovelRepository.findById(id);
+        }
+        return imovelRepository.findByIdAndEmpresa_Id(id, empresaId);
+    }
+
     public List<ImovelResponse> listarTodos() {
 
         var usuarioLogado = getUsuarioLogado();
@@ -51,7 +64,7 @@ public class ImovelService {
 
     public ImovelResponse buscarPorId(Long id) {
 
-        var imovel = imovelRepository.findById(id).orElse(null);
+        var imovel = buscarNaEmpresa(id).orElse(null);
         if(imovel == null){
             return null;
         }
@@ -70,7 +83,7 @@ public class ImovelService {
 
     public boolean atualizarStatus(Long id, AtualizarStatusImovel request) {
 
-        Imovel imovelBanco = imovelRepository.findById(id).orElse(null);
+        Imovel imovelBanco = buscarNaEmpresa(id).orElse(null);
         if(imovelBanco != null){
             imovelBanco.setStatus(request.statusImovel());
             imovelRepository.save(imovelBanco);
@@ -81,7 +94,7 @@ public class ImovelService {
 
     public ImovelResponse atualizar(Long id, ImovelRequest request) {
 
-        Imovel imovelBanco = imovelRepository.findById(id).orElse(null);
+        Imovel imovelBanco = buscarNaEmpresa(id).orElse(null);
         if(imovelBanco != null){
             imovelBanco.setEndereco(request.endereco());
             imovelBanco.setTipo(request.tipo());

@@ -5,6 +5,7 @@ import { Imovel, ImovelFormProps } from "@/app/types/imovel";
 import Link from "next/link";
 import { useState } from "react";
 import { atualizarImovel, salvarImovel } from "@/app/services/imovelService";
+import { buscarEnderecoPorCep } from "@/app/services/enderecoService";
 
 export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
 
@@ -13,6 +14,25 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
   const [imovel, setImovel] = useState<Imovel>(imovelExistente || new Imovel(null, "", "", 0, 0, 0, 0, "", "DISPONIVEL", ""));
 
 
+
+  const [cep, setCep] = useState("");
+
+  // Busca o endereco pelo CEP (backend -> ViaCEP) e preenche o campo endereco
+  const handlerBuscarCep = async () => {
+    if (cep.replace(/\D/g, "").length !== 8) {
+      return;
+    }
+
+    try {
+      const e = await buscarEnderecoPorCep(cep);
+      const enderecoCompleto = [e.logradouro, e.bairro, e.cidade + " - " + e.uf]
+        .filter((parte) => parte && parte.trim() !== "")
+        .join(", ");
+      handlerChange('endereco', enderecoCompleto);
+    } catch (error) {
+      alert("CEP invalido ou erro ao consultar CEP!");
+    }
+  }
 
   const handlerSalvar = async (formData : FormData) => {
 
@@ -83,6 +103,23 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
       {/* Card do Formulário */}
       <form action={handlerSalvar} className="bg-white border border-stone-200/60 rounded-3xl p-6 md:p-8 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.05)]">
         <div className="space-y-5">
+
+          {/* CEP (preenche o endereco pela API externa ViaCEP) */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+              CEP
+            </label>
+            <input
+              type="text"
+              name="cep"
+              value={cep}
+              onChange={(e) => setCep(e.target.value)}
+              onBlur={handlerBuscarCep}
+              placeholder="00000-000"
+              maxLength={9}
+              className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200 font-mono"
+            />
+          </div>
 
           {/* Endereço */}
           <div>

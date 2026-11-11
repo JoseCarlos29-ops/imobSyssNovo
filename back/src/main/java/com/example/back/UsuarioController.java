@@ -33,6 +33,12 @@ public class UsuarioController {
     private PasswordField txtSenha;
 
     @FXML
+    private TextField txtEmpresa;
+
+    @FXML
+    private TextField txtCnpj;
+
+    @FXML
     public void salvarUsuario(ActionEvent event) throws Exception {
 
 
@@ -43,12 +49,16 @@ public class UsuarioController {
                         "  \"email\": \"%s\",\n" +
                         "  \"senha\": \"%s\",\n" +
                         "  \"cpf\": \"%s\",\n" +
-                        "  \"secretKey\": \"%s\"\n" +
+                        "  \"secretKey\": \"%s\",\n" +
+                        "  \"nomeEmpresa\": \"%s\",\n" +
+                        "  \"cnpj\": \"%s\"\n" +
                         "}", txtNome.getText(),
                 txtEmail.getText(),
                 txtSenha.getText(),
                 txtCpf.getText(),
-                "sakjbhaskjcdhaiubshLKVAShfbdw68asd65d");
+                "sakjbhaskjcdhaiubshLKVAShfbdw68asd65d",
+                txtEmpresa.getText(),
+                txtCnpj.getText());
 
         int respostaApi = executaMetodoAPI("http://localhost:8080/usuarios/admin",jsonRequest,"POST");
 

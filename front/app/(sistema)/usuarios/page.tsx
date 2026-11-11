@@ -1,7 +1,6 @@
 "use client"
 import { atualizarStatusUsuario, buscarListaUsuarios, deletarUsuario } from "@/app/services/usuarioService";
 import { Usuario } from "@/app/types/usuario";
-import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -52,13 +51,13 @@ export default function Usuarios(){
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-stone-100 p-6 md:p-10 font-sans antialiased overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgba(120,53,15,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(69,26,3,0.1),transparent_50%),linear-gradient(to_bottom_right,#fafaf9,#f5f5f4)]">
+    <div className="relative min-h-screen w-full bg-stone-100 p-4 md:p-6 font-sans antialiased overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgba(120,53,15,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(69,26,3,0.1),transparent_50%),linear-gradient(to_bottom_right,#fafaf9,#f5f5f4)]">
 
       {/* Detalhes de fundo em tons quentes */}
       <div className="absolute top-10 left-10 w-96 h-96 bg-amber-900/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-950/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto space-y-8">
+      <div className="relative z-10 w-full space-y-8">
         {/* Cabeçalho */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -84,22 +83,22 @@ export default function Usuarios(){
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-stone-100">
-                  <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-semibold text-black uppercase tracking-wider">
                     Código
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-semibold text-black uppercase tracking-wider">
                     Nome
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-semibold text-black uppercase tracking-wider">
                     CPF
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-semibold text-black uppercase tracking-wider">
                     E-mail
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-semibold text-black uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-black uppercase tracking-wider text-right">
+                  <th className="px-4 py-3 text-xs font-semibold text-black uppercase tracking-wider text-right">
                     Ações
                   </th>
                 </tr>
@@ -110,24 +109,24 @@ export default function Usuarios(){
                     key={usuario.id}
                     className="hover:bg-stone-50/80 transition-colors duration-200 text-stone-800"
                   >
-                    <td className="px-6 py-4 text-sm font-medium text-black">
+                    <td className="px-4 py-3 text-sm font-medium text-black">
                       #{usuario.id}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium">
+                    <td className="px-4 py-3 text-sm font-medium">
                       {usuario.nome}
                     </td>
-                    <td className="px-6 py-4 text-sm text-stone-600 font-mono">
+                    <td className="px-4 py-3 text-sm text-stone-600 font-mono">
                       {usuario.cpf}
                     </td>
-                    <td className="px-6 py-4 text-sm text-stone-600">
+                    <td className="px-4 py-3 text-sm text-stone-600">
                       {usuario.email}
                     </td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-4 py-3 text-sm">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-900/10 text-amber-900 border border-amber-900/20">
                         {usuario.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-right">
+                    <td className="px-4 py-3 text-sm text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/usuarios/${usuario.id}/editar`}
@@ -163,7 +162,7 @@ export default function Usuarios(){
                   <tr>
                     <td
                       colSpan={6}
-                      className="px-6 py-16 text-center text-stone-400 text-sm font-light italic"
+                      className="px-4 py-12 text-center text-stone-400 text-sm font-light italic"
                     >
                       Nenhum usuário encontrado!
                     </td>
