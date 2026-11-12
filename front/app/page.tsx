@@ -4,16 +4,18 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-    {/* Estilos embutidos para teste rápido (ou você pode mover para o seu globals.css) */}
+    {/* Estilos embutidos (paleta igual à do login e das telas do sistema: stone + amber + preto) */}
     <style dangerouslySetInnerHTML={{ __html: `
       :root {
-          --primary-blue: #0056b3;
-          --primary-dark: #003366;
-          --primary-light: #e6f0fa;
-          --accent-blue: #00a8cc;
-          --text-main: #333333;
-          --text-muted: #666666;
-          --bg-color: #f9fbff;
+          --primary: #000000;          /* botões pretos, como no login */
+          --primary-dark: #1c1917;     /* stone-900 */
+          --primary-light: #f5f5f4;    /* stone-100 */
+          --accent: #78350f;           /* amber-900 */
+          --accent-deep: #451a03;      /* amber-950 */
+          --border: #e7e5e4;           /* stone-200 */
+          --text-main: #1c1917;        /* stone-900 */
+          --text-muted: #57534e;       /* stone-600 */
+          --bg-color: #f5f5f4;         /* stone-100 */
           --white: #ffffff;
           --transition: all 0.3s ease;
       }
@@ -27,6 +29,11 @@ export default function Home() {
       body {
           font-family: 'Inter', sans-serif;
           background-color: var(--bg-color);
+          background-image:
+            radial-gradient(ellipse at top left, rgba(120, 53, 15, 0.15), transparent 50%),
+            radial-gradient(ellipse at bottom right, rgba(69, 26, 3, 0.1), transparent 50%),
+            linear-gradient(to bottom right, #fafaf9, #f5f5f4);
+          background-attachment: fixed;
           color: var(--text-main);
           line-height: 1.6;
       }
@@ -38,7 +45,8 @@ export default function Home() {
 
       header {
           background-color: var(--white);
-          box-shadow: 0 2px 10px rgba(0, 86, 179, 0.05);
+          border-bottom: 1px solid rgba(231, 229, 228, 0.6);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
           position: fixed;
           top: 0;
           left: 0;
@@ -62,10 +70,11 @@ export default function Home() {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+          letter-spacing: -0.03em;
       }
 
       .logo span {
-          color: var(--accent-blue);
+          color: var(--accent);
       }
 
       .nav-links {
@@ -82,17 +91,17 @@ export default function Home() {
       }
 
       .nav-links a:not(.btn-login):hover {
-          color: var(--primary-blue);
+          color: var(--accent);
       }
 
       .btn-login {
-          background-color: var(--primary-blue);
+          background-color: var(--primary);
           color: var(--white);
           padding: 0.6rem 1.5rem;
-          border-radius: 50px;
+          border-radius: 12px;
           font-weight: 600;
           transition: var(--transition);
-          box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
       .btn-login:hover {
@@ -113,12 +122,13 @@ export default function Home() {
       .hero-content h1 {
           font-size: 3.2rem;
           line-height: 1.2;
-          color: var(--primary-dark);
+          color: var(--primary);
           margin-bottom: 1.5rem;
+          letter-spacing: -0.03em;
       }
 
       .hero-content h1 span {
-          color: var(--accent-blue);
+          color: var(--accent);
       }
 
       .hero-content p {
@@ -133,12 +143,13 @@ export default function Home() {
       }
 
       .btn-primary {
-          background-color: var(--primary-blue);
+          background-color: var(--primary);
           color: var(--white);
           padding: 0.9rem 2rem;
-          border-radius: 8px;
+          border-radius: 12px;
           font-weight: 700;
           transition: var(--transition);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
       .btn-primary:hover {
@@ -146,11 +157,11 @@ export default function Home() {
       }
 
       .hero-card {
-          background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
-          border-radius: 20px;
+          background: linear-gradient(135deg, var(--primary-dark), var(--accent-deep));
+          border-radius: 24px;
           padding: 3rem;
           color: var(--white);
-          box-shadow: 0 20px 40px rgba(0, 51, 102, 0.2);
+          box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.25);
           position: relative;
           overflow: hidden;
       }
@@ -166,6 +177,7 @@ export default function Home() {
 
       .about {
           background-color: var(--white);
+          border-top: 1px solid var(--border);
           padding: 6rem 2rem;
       }
 
@@ -177,8 +189,9 @@ export default function Home() {
 
       .about h2 {
           font-size: 2.5rem;
-          color: var(--primary-dark);
+          color: var(--primary);
           margin-bottom: 1.5rem;
+          letter-spacing: -0.03em;
       }
 
       .about p {
@@ -198,17 +211,19 @@ export default function Home() {
 
       .feature-box {
           background-color: var(--primary-light);
+          border: 1px solid var(--border);
           padding: 2rem;
-          border-radius: 12px;
+          border-radius: 20px;
           transition: var(--transition);
       }
 
       .feature-box:hover {
           transform: translateY(-5px);
+          border-color: rgba(120, 53, 15, 0.3);
       }
 
       .feature-box h4 {
-          color: var(--primary-dark);
+          color: var(--accent);
           margin-bottom: 0.8rem;
           font-size: 1.2rem;
       }
@@ -252,12 +267,8 @@ export default function Home() {
           <li><a href="#sobre">Nossa História</a></li>
           <li><a href="#recursos">Recursos</a></li>
           <li>
-            
             <Link href="/login" className="btn-login">Entrar</Link>
           </li>
-
-          
-          
         </ul>
       </div>
     </header>
@@ -283,7 +294,7 @@ export default function Home() {
         <div className="about-container">
           <h2>Nossa História</h2>
           <p>O <strong>ImobSyss</strong> nasceu como um projeto de gestão imobiliária, pensado para ter facilidade de cadastro, controle de perfil de usuário e uma gestão de acessos simples e segura.</p>
-          
+
           <div className="features-grid" id="recursos">
             <div className="feature-box">
               <h4>Fácil Cadastro</h4>
