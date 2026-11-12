@@ -50,11 +50,16 @@ public class ContratoController {
     }
     @PatchMapping("/{id}/AtualizarStatusContrato")
     @Operation(summary = "Metodo de atualização de status de contratos", description = "Metodo responsavel em efetuar a atualização do status dos contratos")
-    public ResponseEntity<Void> atualizarStatusContrato(@PathVariable Long id, @RequestBody AtualizarStatusContrato statusContratoRequest) {
-        if (contratoService.atualizarStatusContrato(id, statusContratoRequest)) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<?> atualizarStatusContrato(@PathVariable Long id, @RequestBody AtualizarStatusContrato statusContratoRequest) {
+
+        try {
+            if (contratoService.atualizarStatusContrato(id, statusContratoRequest)) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}/atualizarContratos")
@@ -75,10 +80,15 @@ public class ContratoController {
 
     @DeleteMapping("/{id}/excluirContrato")
     @Operation(summary = "Metodo de exclusão de contrato", description = "Metodo responsavel em efetuar o cancelamento de contratos")
-    public ResponseEntity<Void> excluirContrato(@PathVariable Long id) {
-        if (contratoService.excluir(id)) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<?> excluirContrato(@PathVariable Long id) {
+
+        try {
+            if (contratoService.excluir(id)) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 }

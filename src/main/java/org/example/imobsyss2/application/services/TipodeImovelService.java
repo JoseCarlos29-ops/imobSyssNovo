@@ -1,12 +1,15 @@
-/*package org.example.imobsyss2.application.services;
+package org.example.imobsyss2.application.services;
 
 import org.example.imobsyss2.application.dtos.CriarTipoImovelRequest;
 import org.example.imobsyss2.application.dtos.TipoImovelResponse;
+import org.example.imobsyss2.application.dtos.UsuarioLogado;
+import org.example.imobsyss2.domain.entities.Empresa;
 import org.example.imobsyss2.domain.entities.TipodeImovel;
-import org.example.imobsyss2.domain.exceptions.RegraNegocioException;
+import org.example.imobsyss2.domain.repository.EmpresaRepository;
 import org.example.imobsyss2.domain.repository.ImovelRepository;
 import org.example.imobsyss2.domain.repository.TipoImovelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,11 +26,24 @@ public class TipodeImovelService {
     private ImovelRepository imovelRepository;
 
     @Autowired
-    private UsuarioLogadoProvider usuarioLogadoProvider;
+    private EmpresaRepository empresaRepository;
 
-    // Usuario sem empresa (admin geral) enxerga tudo; os demais so a propria empresa
+    public UsuarioLogado getUsuarioLogado(){
+        return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    private Empresa buscarEmpresaDoUsuarioLogado() {
+        var empresaId = getUsuarioLogado().empresa_id();
+        if (empresaId == null) {
+            return null;
+        }
+        return empresaRepository.findById(empresaId).orElse(null);
+    }
+
+    // Multilocacao: usuario com empresa so enxerga/altera registros da propria empresa.
+    // Usuario sem empresa (admin geral) enxerga tudo.
     private Optional<TipodeImovel> buscarNaEmpresa(Long id) {
-        Long empresaId = usuarioLogadoProvider.empresaId();
+        var empresaId = getUsuarioLogado().empresa_id();
 
         if (empresaId == null) {
             return tipoImovelRepository.findById(id);
@@ -40,7 +56,7 @@ public class TipodeImovelService {
         if (nome == null) {
             return;
         }
-        Long empresaId = usuarioLogadoProvider.empresaId();
+        var empresaId = getUsuarioLogado().empresa_id();
 
         boolean duplicado = tipoImovelRepository.findByNomeIgnoreCase(nome.trim())
                 .stream()
@@ -48,7 +64,7 @@ public class TipodeImovelService {
                 .anyMatch(t -> Objects.equals(t.getEmpresa() == null ? null : t.getEmpresa().getId(), empresaId));
 
         if (duplicado) {
-            throw new RegraNegocioException("Ja existe um tipo de imovel com este nome!");
+            throw new IllegalArgumentException("Ja existe um tipo de imovel com este nome!");
         }
     }
 
@@ -63,71 +79,76 @@ public class TipodeImovelService {
     }
 
     public List<TipoImovelResponse> listarTodos() {
-        Long empresaId = usuarioLogadoProvider.empresaId();
 
-        if (empresaId == null) {
+        var usuarioLogado = getUsuarioLogado();
+
+        if (usuarioLogado.empresa_id() == null) {
             return tipoImovelRepository.findAll()
                     .stream()
                     .map(TipoImovelResponse::new)
                     .toList();
         }
 
-        return tipoImovelRepository.getTiposByEmpresa_Id(empresaId)
+        return tipoImovelRepository.getTiposByEmpresa_Id(usuarioLogado.empresa_id())
                 .stream()
                 .map(TipoImovelResponse::new)
                 .toList();
     }
 
     public TipoImovelResponse buscarPorId(Long id) {
-        return buscarNaEmpresa(id)
-                .map(TipoImovelResponse::new)
-                .orElse(null);
-    }
 
-    public TipoImovelResponse criar(CriarTipoImovelRequest request) {
-        validarNomeUnico(request.nome(), null);
-
-        TipodeImovel tipo = new TipodeImovel();
-        tipo.atualizarDados(request.nome(), request.descricao());
-        tipo.setEmpresa(usuarioLogadoProvider.empresa());
-
-        return new TipoImovelResponse(tipoImovelRepository.save(tipo));
-    }
-
-    public TipoImovelResponse atualizar(Long id, CriarTipoImovelRequest request) {
-        TipodeImovel tipoBanco = buscarNaEmpresa(id).orElse(null);
-
-        if (tipoBanco == null) {
+        var tipo = buscarNaEmpresa(id).orElse(null);
+        if(tipo == null){
             return null;
         }
 
-        boolean mudouNome = request.nome() == null
-                || !tipoBanco.getNome().equalsIgnoreCase(request.nome().trim());
+        return new TipoImovelResponse(tipo);
+    }
 
-        if (mudouNome && tipoEmUso(tipoBanco)) {
-            throw new RegraNegocioException("Tipo de imovel em uso por imoveis nao pode ser renomeado!");
+    public TipoImovelResponse criar(CriarTipoImovelRequest request) {
+
+        TipodeImovel tipoBanco = new TipodeImovel(request);
+        validarNomeUnico(tipoBanco.getNome(), null);
+        tipoBanco.setEmpresa(buscarEmpresaDoUsuarioLogado());
+        tipoImovelRepository.save(tipoBanco);
+
+        return new TipoImovelResponse(tipoBanco);
+    }
+
+    public TipoImovelResponse atualizar(Long id, CriarTipoImovelRequest request) {
+
+        TipodeImovel tipoBanco = buscarNaEmpresa(id).orElse(null);
+        if(tipoBanco != null){
+
+            boolean mudouNome = request.nome() == null
+                    || !tipoBanco.getNome().equalsIgnoreCase(request.nome().trim());
+
+            if (mudouNome && tipoEmUso(tipoBanco)) {
+                throw new IllegalArgumentException("Tipo de imovel em uso por imoveis nao pode ser renomeado!");
+            }
+
+            validarNomeUnico(request.nome(), id);
+            tipoBanco.atualizarDados(request.nome(), request.descricao());
+            tipoImovelRepository.save(tipoBanco);
+
+            return new TipoImovelResponse(tipoBanco);
         }
 
-        validarNomeUnico(request.nome(), id);
-        tipoBanco.atualizarDados(request.nome(), request.descricao());
-
-        return new TipoImovelResponse(tipoImovelRepository.save(tipoBanco));
+        return null;
     }
 
     public boolean excluir(Long id) {
+
         TipodeImovel tipoBanco = buscarNaEmpresa(id).orElse(null);
+        if(tipoBanco != null){
 
-        if (tipoBanco == null) {
-            return false;
+            if (tipoEmUso(tipoBanco)) {
+                throw new IllegalArgumentException("Tipo de imovel em uso por imoveis nao pode ser excluido!");
+            }
+
+            tipoImovelRepository.delete(tipoBanco);
+            return true;
         }
-
-        if (tipoEmUso(tipoBanco)) {
-            throw new RegraNegocioException("Tipo de imovel em uso por imoveis nao pode ser excluido!");
-        }
-
-        tipoImovelRepository.delete(tipoBanco);
-        return true;
+        return false;
     }
 }
-
- */

@@ -85,7 +85,7 @@ public class ContratoService {
 
         Contrato contratoBanco = buscarNaEmpresa(id).orElse(null);
         if(contratoBanco != null){
-            contratoBanco.setStatusContrato(request.statusContrato());
+            contratoBanco.atualizarStatus(request.statusContrato());
             contratoRepository.save(contratoBanco);
             return true;
         }
@@ -96,10 +96,8 @@ public class ContratoService {
 
         Contrato contratoBanco = buscarNaEmpresa(id).orElse(null);
         if(contratoBanco != null){
-            contratoBanco.setTipo(request.tipo());
-            contratoBanco.setValorContrato(request.valorContrato());
-            contratoBanco.setValorComissao(request.valorComissao());
-            contratoBanco.setDataContrato(request.dataContrato());
+            contratoBanco.atualizarDados(request.tipo(), request.valorContrato(),
+                    request.valorComissao(), request.dataContrato());
             contratoRepository.save(contratoBanco);
             return new ContratoResponse(contratoBanco);
         }

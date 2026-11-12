@@ -4,7 +4,8 @@ import org.example.imobsyss2.domain.entities.Imovel;
 
 public record ImovelResponse(Long id, String endereco, String tipo, double valor, double area,
                              int quartos, int banheiros, String descricao,
-                             EnumStatusImovel status, String proprietario) {
+                             EnumStatusImovel status, String proprietario,
+                             String cep, String bairro, String cidade, String uf) {
 
     public ImovelResponse(Imovel imovelEntidade) {
         this(
@@ -17,7 +18,11 @@ public record ImovelResponse(Long id, String endereco, String tipo, double valor
                 imovelEntidade.getBanheiros(),
                 imovelEntidade.getDescricao(),
                 imovelEntidade.getStatus(),
-                imovelEntidade.getProprietario()
+                imovelEntidade.getProprietario(),
+                imovelEntidade.getCep(),
+                imovelEntidade.getBairro(),
+                imovelEntidade.getCidade(),
+                imovelEntidade.getUf()
         );
     }
 }

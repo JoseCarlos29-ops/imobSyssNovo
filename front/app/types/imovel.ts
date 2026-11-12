@@ -9,7 +9,12 @@ export class Imovel{
         public banheiros: number,
         public descricao: string,
         public status: string,
-        public proprietario: string
+        public proprietario: string,
+        // localidade preenchida pelo ViaCEP (a partir do CEP)
+        public cep: string = "",
+        public bairro: string = "",
+        public cidade: string = "",
+        public uf: string = ""
 
     ){}
 }

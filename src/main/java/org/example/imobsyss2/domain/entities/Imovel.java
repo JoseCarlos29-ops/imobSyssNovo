@@ -25,6 +25,15 @@ public class Imovel {
 
     private String endereco;
 
+    // Localidade preenchida pela API externa ViaCEP (a partir do CEP)
+    private String cep;
+
+    private String bairro;
+
+    private String cidade;
+
+    private String uf;
+
     private String tipo;
 
     private double valor;
@@ -95,6 +104,52 @@ public class Imovel {
             throw new IllegalArgumentException("Proprietario Invalido!");
         }
         this.proprietario = proprietario;
+    }
+
+    // Regra: a localidade so e aceita se o CEP tiver 8 digitos, a cidade existir e a UF tiver 2 letras
+    public void informarLocalizacao(String cep, String bairro, String cidade, String uf) {
+        String cepNumerico = cep == null ? "" : cep.replaceAll("\\D", "");
+
+        if(cepNumerico.length() != 8){
+            throw new IllegalArgumentException("CEP Invalido!");
+        }
+        if(cidade == null || cidade.isBlank()){
+            throw new IllegalArgumentException("Cidade Invalida!");
+        }
+        if(uf == null || !uf.trim().matches("[A-Za-z]{2}")){
+            throw new IllegalArgumentException("UF Invalida!");
+        }
+
+        this.cep = cepNumerico;
+        this.bairro = bairro == null ? "" : bairro.trim();
+        this.cidade = cidade.trim();
+        this.uf = uf.trim().toUpperCase();
+    }
+
+    // Regra: somente imovel disponivel ou reservado pode receber interesse de clientes
+    public boolean aceitaInteresse() {
+        return this.status == EnumStatusImovel.DISPONIVEL || this.status == EnumStatusImovel.RESERVADO;
+    }
+
+    // Regras de mudanca de status do imovel
+    public void atualizarStatus(EnumStatusImovel novoStatus) {
+        if(novoStatus == null){
+            throw new IllegalArgumentException("Status Invalido!");
+        }
+        if(novoStatus == this.status){
+            return;
+        }
+        if(this.status == EnumStatusImovel.INDISPONIVEL && novoStatus != EnumStatusImovel.DISPONIVEL){
+            throw new IllegalArgumentException("Imovel indisponivel so pode ser reativado como disponivel!");
+        }
+        if(this.status == EnumStatusImovel.EM_MANUTENCAO
+                && (novoStatus == EnumStatusImovel.ALUGADO || novoStatus == EnumStatusImovel.VENDIDO)){
+            throw new IllegalArgumentException("Imovel em manutencao nao pode ser alugado ou vendido!");
+        }
+        if(this.status == EnumStatusImovel.ALUGADO && novoStatus == EnumStatusImovel.INDISPONIVEL){
+            throw new IllegalArgumentException("Imovel alugado nao pode ser excluido!");
+        }
+        this.status = novoStatus;
     }
 
     public Imovel(ImovelRequest imovel) {

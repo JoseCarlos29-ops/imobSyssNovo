@@ -1,5 +1,6 @@
 package org.example.imobsyss2.application.services;
 
+import org.example.imobsyss2.application.dto.EnderecoResponse;
 import org.example.imobsyss2.application.dtos.*;
 import org.example.imobsyss2.domain.entities.Empresa;
 import org.example.imobsyss2.domain.entities.Imovel;
@@ -20,6 +21,9 @@ public class ImovelService {
 
     @Autowired
     private EmpresaRepository empresaRepository;
+
+    @Autowired
+    private EnderecoService enderecoService;
 
     public UsuarioLogado getUsuarioLogado(){
         return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -43,6 +47,28 @@ public class ImovelService {
             return imovelRepository.findById(id);
         }
         return imovelRepository.findByIdAndEmpresa_Id(id, empresaId);
+    }
+
+    // Integracao externa (ViaCEP): quando o CEP e informado, a localidade vem da API
+    private EnderecoResponse consultarCep(String cep) {
+        if (cep == null || cep.isBlank()) {
+            return null;
+        }
+        try {
+            return enderecoService.BuscarEndereco(cep);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("CEP invalido ou nao encontrado!");
+        }
+    }
+
+    // Se o endereco veio em branco, usa o logradouro retornado pelo ViaCEP
+    private ImovelRequest completarEndereco(ImovelRequest request, EnderecoResponse local) {
+        if (local != null && (request.endereco() == null || request.endereco().isBlank())) {
+            return new ImovelRequest(local.logradouro(), request.tipo(), request.valor(), request.area(),
+                    request.quartos(), request.banheiros(), request.descricao(), request.proprietario(),
+                    request.cep());
+        }
+        return request;
     }
 
     public List<ImovelResponse> listarTodos() {
@@ -74,7 +100,12 @@ public class ImovelService {
 
     public ImovelResponse criar(ImovelRequest request) {
 
-        Imovel imovelBanco = new Imovel(request);
+        var local = consultarCep(request.cep());
+
+        Imovel imovelBanco = new Imovel(completarEndereco(request, local));
+        if (local != null) {
+            imovelBanco.informarLocalizacao(local.cep(), local.bairro(), local.cidade(), local.uf());
+        }
         imovelBanco.setEmpresa(buscarEmpresaDoUsuarioLogado());
         imovelRepository.save(imovelBanco);
 
@@ -85,7 +116,7 @@ public class ImovelService {
 
         Imovel imovelBanco = buscarNaEmpresa(id).orElse(null);
         if(imovelBanco != null){
-            imovelBanco.setStatus(request.statusImovel());
+            imovelBanco.atualizarStatus(request.statusImovel());
             imovelRepository.save(imovelBanco);
             return true;
         }
@@ -96,14 +127,20 @@ public class ImovelService {
 
         Imovel imovelBanco = buscarNaEmpresa(id).orElse(null);
         if(imovelBanco != null){
-            imovelBanco.setEndereco(request.endereco());
-            imovelBanco.setTipo(request.tipo());
-            imovelBanco.setValor(request.valor());
-            imovelBanco.setArea(request.area());
-            imovelBanco.setQuartos(request.quartos());
-            imovelBanco.setBanheiros(request.banheiros());
-            imovelBanco.setDescricao(request.descricao());
-            imovelBanco.setProprietario(request.proprietario());
+            var local = consultarCep(request.cep());
+            var dados = completarEndereco(request, local);
+
+            imovelBanco.setEndereco(dados.endereco());
+            imovelBanco.setTipo(dados.tipo());
+            imovelBanco.setValor(dados.valor());
+            imovelBanco.setArea(dados.area());
+            imovelBanco.setQuartos(dados.quartos());
+            imovelBanco.setBanheiros(dados.banheiros());
+            imovelBanco.setDescricao(dados.descricao());
+            imovelBanco.setProprietario(dados.proprietario());
+            if (local != null) {
+                imovelBanco.informarLocalizacao(local.cep(), local.bairro(), local.cidade(), local.uf());
+            }
             imovelRepository.save(imovelBanco);
             return new ImovelResponse(imovelBanco);
         }

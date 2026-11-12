@@ -53,11 +53,16 @@ public class ClienteController {
 
     @PatchMapping("/{id}/statusCliente")
     @Operation(summary = "Metodo de atualização de status de clientes", description = "Metodo responsavel em efetuar a atualização dos status dos clientes")
-    public ResponseEntity<Void> atualizarStatusCliente(@PathVariable Long id, @RequestBody AtualizarStatusCliente statusClienteRequest) {
-        if (clienteService.atualizarStatusCliente(id, statusClienteRequest)) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<?> atualizarStatusCliente(@PathVariable Long id, @RequestBody AtualizarStatusCliente statusClienteRequest) {
+
+        try {
+            if (clienteService.atualizarStatusCliente(id, statusClienteRequest)) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}/atualizarCliente")
@@ -80,13 +85,17 @@ public class ClienteController {
     @Operation(summary = "Metodo de registro de interesse do cliente em um imovel", description = "Metodo responsavel em vincular um imovel de interesse ao cliente")
     public ResponseEntity<?> interessarImovel(@PathVariable Long id, @RequestBody InteresseRequest interesseRequest) {
 
-        boolean retornoInteresse = clienteService.registrarInteresse(id, interesseRequest);
+        try {
+            boolean retornoInteresse = clienteService.registrarInteresse(id, interesseRequest);
 
-        if (retornoInteresse) {
-            return ResponseEntity.ok().build();
+            if (retornoInteresse) {
+                return ResponseEntity.ok().build();
+            }
+
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}/excluirCliente")

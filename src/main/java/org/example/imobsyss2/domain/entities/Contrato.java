@@ -63,6 +63,38 @@ public class Contrato {
         this.dataContrato = dataContrato;
     }
 
+    // Regras de mudanca de status do contrato:
+    // cancelado/rescindido sao finais e encerrado nao pode ser reaberto
+    public void atualizarStatus(EnumStatusContrato novoStatus) {
+        if(novoStatus == null){
+            throw new IllegalArgumentException("Status Invalido!");
+        }
+        if(novoStatus == this.statusContrato){
+            return;
+        }
+        if(this.statusContrato == EnumStatusContrato.CANCELADO || this.statusContrato == EnumStatusContrato.RESCINDIDO){
+            throw new IllegalArgumentException("Contrato cancelado ou rescindido nao pode mudar de status!");
+        }
+        if(this.statusContrato == EnumStatusContrato.ENCERRADO
+                && novoStatus != EnumStatusContrato.RESCINDIDO && novoStatus != EnumStatusContrato.CANCELADO){
+            throw new IllegalArgumentException("Contrato encerrado nao pode ser reaberto!");
+        }
+        this.statusContrato = novoStatus;
+    }
+
+    // Regra: contrato finalizado nao pode ter os dados alterados
+    public void atualizarDados(String tipo, double valorContrato, double valorComissao, double dataContrato) {
+        if(this.statusContrato == EnumStatusContrato.ENCERRADO
+                || this.statusContrato == EnumStatusContrato.RESCINDIDO
+                || this.statusContrato == EnumStatusContrato.CANCELADO){
+            throw new IllegalArgumentException("Contrato finalizado nao pode ser alterado!");
+        }
+        this.setTipo(tipo);
+        this.setValorContrato(valorContrato);
+        this.setValorComissao(valorComissao);
+        this.setDataContrato(dataContrato);
+    }
+
     public Contrato(ContratoRequest contrato) {
         this.setTipo(contrato.tipo());
         this.setValorContrato(contrato.valorContrato());

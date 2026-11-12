@@ -100,7 +100,7 @@ public class ClienteService {
 
         Cliente clienteBanco = buscarNaEmpresa(id).orElse(null);
         if(clienteBanco != null){
-            clienteBanco.setStatusCliente(request.statusCliente());
+            clienteBanco.atualizarStatus(request.statusCliente());
             clienteRepository.save(clienteBanco);
             return true;
         }
@@ -134,18 +134,11 @@ public class ClienteService {
         Imovel imovelBanco = buscarImovelNaEmpresa(interesseRequest.imovel_id()).orElse(null);
         if (clienteBanco != null && imovelBanco != null) {
 
-            var imovel = clienteBanco.getImoveis().stream()
-                    .anyMatch(i -> i.getId().equals(imovelBanco.getId()));
+            // as regras do interesse ficam na entidade Cliente
+            clienteBanco.interessar(imovelBanco);
+            clienteRepository.save(clienteBanco);
 
-            if (imovel) {
-                return true;
-            } else {
-                clienteBanco.getImoveis().add(imovelBanco);
-
-                clienteRepository.save(clienteBanco);
-
-                return true;
-            }
+            return true;
 
         }
         return false;

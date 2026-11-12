@@ -49,8 +49,38 @@ public class Cliente {
     )
     private Set<Imovel> imoveis = new HashSet<>();
 
+    // Regras do interesse: cliente ativo, imovel disponivel/reservado e sem duplicidade.
+    // Cliente que estava apenas "em contato" passa a "interessado".
     public void interessar(Imovel imovel){
+        if(this.statusCliente == EnumStatusCliente.INATIVO || this.statusCliente == EnumStatusCliente.BLOQUEADO){
+            throw new IllegalArgumentException("Cliente inativo ou bloqueado nao pode registrar interesse!");
+        }
+        if(!imovel.aceitaInteresse()){
+            throw new IllegalArgumentException("Imovel nao esta disponivel para interesse!");
+        }
+
+        boolean jaInteressado = this.imoveis.stream()
+                .anyMatch(i -> i.getId().equals(imovel.getId()));
+        if(jaInteressado){
+            return;
+        }
+
         this.imoveis.add(imovel);
+
+        if(this.statusCliente == EnumStatusCliente.EM_CONTATO){
+            this.statusCliente = EnumStatusCliente.INTERESSADO;
+        }
+    }
+
+    // Regra: so entra em negociacao quem tem pelo menos um imovel de interesse
+    public void atualizarStatus(EnumStatusCliente novoStatus){
+        if(novoStatus == null){
+            throw new IllegalArgumentException("Status Invalido!");
+        }
+        if(novoStatus == EnumStatusCliente.EM_NEGOCIACAO && this.imoveis.isEmpty()){
+            throw new IllegalArgumentException("Cliente sem imovel de interesse nao pode entrar em negociacao!");
+        }
+        this.statusCliente = novoStatus;
     }
 
     public void setNome(String nome) {

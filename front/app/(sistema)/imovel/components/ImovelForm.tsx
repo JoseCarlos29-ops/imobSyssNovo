@@ -3,9 +3,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Imovel, ImovelFormProps } from "@/app/types/imovel";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { atualizarImovel, salvarImovel } from "@/app/services/imovelService";
 import { buscarEnderecoPorCep } from "@/app/services/enderecoService";
+import { buscarTiposImovel } from "@/app/services/tipoImovelService";
+import { TipoImovel } from "@/app/types/tipoImovel";
 
 export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
 
@@ -15,20 +17,39 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
 
 
 
-  const [cep, setCep] = useState("");
+  // tipos cadastrados pela empresa (tela de Tipo de Imovel do desktop)
+  const [tipos, setTipos] = useState<TipoImovel[]>([]);
 
-  // Busca o endereco pelo CEP (backend -> ViaCEP) e preenche o campo endereco
+  // ultimo CEP consultado: evita consultar de novo ao editar um imovel sem mudar o CEP
+  const [cepConsultado, setCepConsultado] = useState(imovelExistente?.cep ?? "");
+
+  useEffect(() => {
+    carregarTipos();
+  }, []);
+
+  const carregarTipos = async () => {
+    try {
+      setTipos(await buscarTiposImovel());
+    } catch (error) {
+      setTipos([]);
+    }
+  };
+
+  // Busca o endereco pelo CEP (backend -> ViaCEP) e preenche logradouro, bairro, cidade e UF
   const handlerBuscarCep = async () => {
-    if (cep.replace(/\D/g, "").length !== 8) {
+    const cepNumerico = (imovel.cep ?? "").replace(/\D/g, "");
+
+    if (cepNumerico.length !== 8 || cepNumerico === cepConsultado.replace(/\D/g, "")) {
       return;
     }
 
     try {
-      const e = await buscarEnderecoPorCep(cep);
-      const enderecoCompleto = [e.logradouro, e.bairro, e.cidade + " - " + e.uf]
-        .filter((parte) => parte && parte.trim() !== "")
-        .join(", ");
-      handlerChange('endereco', enderecoCompleto);
+      const e = await buscarEnderecoPorCep(cepNumerico);
+      handlerChange('endereco', e.logradouro);
+      handlerChange('bairro', e.bairro);
+      handlerChange('cidade', e.cidade);
+      handlerChange('uf', e.uf);
+      setCepConsultado(cepNumerico);
     } catch (error) {
       alert("CEP invalido ou erro ao consultar CEP!");
     }
@@ -70,7 +91,7 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
     router.push("/imovel")
   }
 
-      const handlerChange = (campos: 'endereco' | 'tipo' | 'valor' | 'area' | 'quartos' | 'banheiros' | 'descricao' | 'status' | 'proprietario', valor: string) => {
+      const handlerChange = (campos: 'endereco' | 'tipo' | 'valor' | 'area' | 'quartos' | 'banheiros' | 'descricao' | 'status' | 'proprietario' | 'cep' | 'bairro' | 'cidade' | 'uf', valor: string) => {
         setImovel(valorAnterior => new Imovel(
       
           valorAnterior.id,
@@ -82,7 +103,11 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
           campos === 'banheiros' ? Number(valor) : valorAnterior.banheiros,
           campos === 'descricao' ? valor : valorAnterior.descricao,
           campos === 'status' ? valor : valorAnterior.status,
-          campos === 'proprietario' ? valor : valorAnterior.proprietario
+          campos === 'proprietario' ? valor : valorAnterior.proprietario,
+          campos === 'cep' ? valor : (valorAnterior.cep ?? ""),
+          campos === 'bairro' ? valor : (valorAnterior.bairro ?? ""),
+          campos === 'cidade' ? valor : (valorAnterior.cidade ?? ""),
+          campos === 'uf' ? valor : (valorAnterior.uf ?? "")
       
         ))
       }
@@ -112,8 +137,8 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
             <input
               type="text"
               name="cep"
-              value={cep}
-              onChange={(e) => setCep(e.target.value)}
+              value={imovel.cep ?? ""}
+              onChange={(e) => handlerChange('cep', e.target.value)}
               onBlur={handlerBuscarCep}
               placeholder="00000-000"
               maxLength={9}
@@ -132,10 +157,55 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
               required
               onChange={(e) => handlerChange('endereco', e.target.value)}
               value={imovel.endereco}
-              placeholder="Rua, número, bairro, cidade"
+              placeholder="Rua e número"
 
               className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
             />
+          </div>
+
+          {/* Localidade (preenchida pelo ViaCEP) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                Bairro
+              </label>
+              <input
+                type="text"
+                name="bairro"
+                readOnly
+                value={imovel.bairro ?? ""}
+                placeholder="Preenchido pelo CEP"
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-100 text-stone-600 text-sm focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                Cidade
+              </label>
+              <input
+                type="text"
+                name="cidade"
+                readOnly
+                value={imovel.cidade ?? ""}
+                placeholder="Preenchido pelo CEP"
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-100 text-stone-600 text-sm focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                UF
+              </label>
+              <input
+                type="text"
+                name="uf"
+                readOnly
+                value={imovel.uf ?? ""}
+                placeholder="UF"
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-100 text-stone-600 text-sm focus:outline-none"
+              />
+            </div>
           </div>
 
           {/* Grid Tipo e Valor */}
@@ -152,10 +222,23 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
                 className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 transition-all duration-200"
               >
                 <option value="" disabled>Selecione o tipo</option>
-                <option value="CASA">Casa</option>
-                <option value="APARTAMENTO">Apartamento</option>
-                <option value="TERRENO">Terreno</option>
-                <option value="COMERCIAL">Comercial</option>
+                {tipos.length > 0 ? (
+                  <>
+                    {tipos.map((tipo) => (
+                      <option key={tipo.id} value={tipo.nome}>{tipo.nome}</option>
+                    ))}
+                    {imovel.tipo && !tipos.some((t) => t.nome.toLowerCase() === imovel.tipo.toLowerCase()) && (
+                      <option value={imovel.tipo}>{imovel.tipo}</option>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <option value="CASA">Casa</option>
+                    <option value="APARTAMENTO">Apartamento</option>
+                    <option value="TERRENO">Terreno</option>
+                    <option value="COMERCIAL">Comercial</option>
+                  </>
+                )}
               </select>
             </div>
 

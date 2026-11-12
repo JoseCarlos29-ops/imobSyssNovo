@@ -32,7 +32,8 @@ export default function Contratos() {
         return;
       }
     } catch (error) {
-      alert("Erro ao excluir contrato!");
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao excluir contrato!");
       return;
     }
 
@@ -45,7 +46,9 @@ export default function Contratos() {
     try {
       await atualizarStatusContrato(contrato);
     } catch (error) {
-      alert("Erro ao atualizar status!");
+      // mostra a regra de negocio que vem do back (ex.: "Contrato cancelado ou rescindido nao pode mudar de status!")
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao atualizar status!");
       return;
     }
 

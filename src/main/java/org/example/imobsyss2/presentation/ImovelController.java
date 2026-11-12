@@ -51,11 +51,16 @@ public class ImovelController {
 
     @PatchMapping("/{id}/statusImovel")
     @Operation(summary = "Metodo de atualização de status de imóveis", description = "Metodo responsavel em efetuar a atualização dos status dos imóveis")
-    public ResponseEntity<Void> atualizarStatus(@PathVariable Long id, @RequestBody AtualizarStatusImovel statusImovelRequest) {
-        if (imovelService.atualizarStatus(id, statusImovelRequest)) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<?> atualizarStatus(@PathVariable Long id, @RequestBody AtualizarStatusImovel statusImovelRequest) {
+
+        try {
+            if (imovelService.atualizarStatus(id, statusImovelRequest)) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}/atualizarImovel")
@@ -76,10 +81,15 @@ public class ImovelController {
 
     @DeleteMapping("/{id}/excluirImovel")
     @Operation(summary = "Metodo de exclusão de imóveis", description = "Metodo responsavel em efetuar a exclusão de imóveis")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (imovelService.excluir(id)) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<?> excluir(@PathVariable Long id) {
+
+        try {
+            if (imovelService.excluir(id)) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 }

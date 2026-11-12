@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.back.TipoImovelController">
+   <children>
+      <Label layoutX="24.0" layoutY="14.0" text="Tipo de Imóvel" />
+      <Label layoutX="24.0" layoutY="48.0" text="Email admin" />
+      <Label layoutX="24.0" layoutY="84.0" text="Senha admin" />
+      <Label layoutX="24.0" layoutY="130.0" text="ID" />
+      <Label layoutX="24.0" layoutY="166.0" text="Nome" />
+      <Label layoutX="24.0" layoutY="202.0" text="Descrição" />
+      <TextField fx:id="txtEmail" layoutX="104.0" layoutY="44.0" prefWidth="190.0" />
+      <PasswordField fx:id="txtSenha" layoutX="104.0" layoutY="80.0" prefWidth="190.0" />
+      <TextField fx:id="txtId" layoutX="104.0" layoutY="126.0" prefWidth="190.0" promptText="vazio = novo tipo" />
+      <TextField fx:id="txtNome" layoutX="104.0" layoutY="162.0" prefWidth="190.0" promptText="Ex: Residencial" />
+      <TextField fx:id="txtDescricao" layoutX="104.0" layoutY="198.0" prefWidth="190.0" />
+      <Button layoutX="104.0" layoutY="250.0" mnemonicParsing="false" onAction="#salvarTipo" prefWidth="90.0" text="Salvar" />
+      <Button layoutX="204.0" layoutY="250.0" mnemonicParsing="false" onAction="#excluirTipo" prefWidth="90.0" text="Excluir" />
+      <Button layoutX="104.0" layoutY="288.0" mnemonicParsing="false" onAction="#listarTipos" prefWidth="190.0" text="Listar tipos" />
+      <TextArea fx:id="txtLista" editable="false" layoutX="320.0" layoutY="44.0" prefHeight="296.0" prefWidth="260.0" />
+      <Button layoutX="24.0" layoutY="354.0" mnemonicParsing="false" onAction="#voltar" text="Voltar" />
+   </children>
+</AnchorPane>

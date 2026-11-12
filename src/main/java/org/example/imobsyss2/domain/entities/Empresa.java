@@ -34,4 +34,7 @@ public class Empresa {
 
     @OneToMany(mappedBy = "empresa")
     private List<Imovel> imoveis;
+
+    @OneToMany(mappedBy = "empresa")
+    private List<TipodeImovel> tiposImovel;
 }

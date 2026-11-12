@@ -42,7 +42,9 @@ export default function Imoveis() {
         return;
       }
     } catch (error) {
-      alert("Erro ao excluir imóvel!");
+      // mostra a regra de negocio que vem do back (ex.: "Imovel alugado nao pode ser excluido!")
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao excluir imóvel!");
       return;
     }
 
@@ -55,7 +57,8 @@ export default function Imoveis() {
     try {
       await atualizarStatusImovel(imovel);
     } catch (error) {
-      alert("Erro ao atualizar status!");
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao atualizar status!");
       return;
     }
 
@@ -153,6 +156,11 @@ export default function Imoveis() {
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">
                       {imovel.endereco}
+                      {imovel.cidade && (
+                        <div className="text-xs font-normal text-stone-500">
+                          {[imovel.bairro, `${imovel.cidade} - ${imovel.uf}`].filter(Boolean).join(", ")}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-stone-600">
                       {imovel.tipo}
