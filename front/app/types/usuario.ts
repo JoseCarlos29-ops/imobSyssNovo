@@ -5,7 +5,9 @@ export class Usuario{
         public email: string,
         public status: string,
         public cpf: string,
-        public senha: string
+        public senha: string,
+        // ROLE_ADMIN, ROLE_CORRETOR ou ROLE_USER (vem do back em /usuarios/buscarusuariologado)
+        public role: string = ""
 
     ){}
 }

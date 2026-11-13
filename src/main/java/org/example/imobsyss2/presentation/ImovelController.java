@@ -63,6 +63,20 @@ public class ImovelController {
         }
     }
 
+    @PatchMapping("/{id}/reservar")
+    @Operation(summary = "Metodo de reserva de imovel", description = "Metodo responsavel em reservar (apartar) um imovel disponivel para alugar ou comprar. Liberado tambem para o ROLE_USER")
+    public ResponseEntity<?> reservar(@PathVariable Long id) {
+
+        try {
+            if (imovelService.reservar(id)) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}/atualizarImovel")
     @Operation(summary = "Metodo de atualização de imóveis", description = "Metodo responsavel em efetuar a atualização de imóveis")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ImovelRequest request) {

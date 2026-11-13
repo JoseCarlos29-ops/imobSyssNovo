@@ -131,6 +131,14 @@ public class Imovel {
         return this.status == EnumStatusImovel.DISPONIVEL || this.status == EnumStatusImovel.RESERVADO;
     }
 
+    // Regra: somente imovel disponivel pode ser reservado (apartado) para alugar ou comprar
+    public void reservar() {
+        if(this.status != EnumStatusImovel.DISPONIVEL){
+            throw new IllegalArgumentException("Somente imovel disponivel pode ser reservado!");
+        }
+        this.status = EnumStatusImovel.RESERVADO;
+    }
+
     // Regras de mudanca de status do imovel
     public void atualizarStatus(EnumStatusImovel novoStatus) {
         if(novoStatus == null){

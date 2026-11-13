@@ -40,6 +40,8 @@ public class SecurityConfiguration {
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/imoveis/**")
                         .hasAnyRole("ADMIN", "CORRETOR", "USER")
+                        .requestMatchers(HttpMethod.PATCH, "/imoveis/*/reservar")
+                        .hasAnyRole("ADMIN", "CORRETOR", "USER")
                         .requestMatchers(HttpMethod.GET, "/tipos-imovel/**")
                         .hasAnyRole("ADMIN", "CORRETOR", "USER")
                         .requestMatchers("/tipos-imovel/**")

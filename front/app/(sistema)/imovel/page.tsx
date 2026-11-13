@@ -5,13 +5,17 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 import { setFiltroStatus, setImoveis } from "@/app/redux/slices/imoveisSlice";
-import { atualizarStatusImovel, buscarListaImoveis, deletarImovel } from "@/app/services/imovelService";
+import { atualizarStatusImovel, buscarListaImoveis, deletarImovel, reservarImovel } from "@/app/services/imovelService";
 
 export default function Imoveis() {
   // lista e filtro de status ficam na store do Redux (imoveisSlice)
   const dispatch = useDispatch();
   const { lista, filtroStatus } = useSelector((state: RootState) => state.imoveis);
   const imoveis = lista.filter((i) => filtroStatus === "TODOS" || i.status === filtroStatus);
+
+  // ROLE_USER so visualiza os imoveis e pode reservar (apartar); nao cadastra, edita, altera status nem exclui
+  const usuarioLogado = useSelector((state: RootState) => state.auth.usuario);
+  const somenteLeitura = usuarioLogado?.role === "ROLE_USER";
 
   useEffect(() => {
     carregarDados();
@@ -45,6 +49,21 @@ export default function Imoveis() {
       // mostra a regra de negocio que vem do back (ex.: "Imovel alugado nao pode ser excluido!")
       const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
       alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao excluir imóvel!");
+      return;
+    }
+
+    carregarDados();
+
+  }
+
+  const handleReservarImovel = async (imovel: Imovel) => {
+
+    try {
+      await reservarImovel(imovel.id || 0);
+      alert("Imóvel reservado com sucesso!");
+    } catch (error) {
+      const mensagem = (error as { response?: { data?: unknown } })?.response?.data;
+      alert(typeof mensagem === "string" && mensagem ? mensagem : "Erro ao reservar imóvel!");
       return;
     }
 
@@ -98,12 +117,14 @@ export default function Imoveis() {
               <option value="INDISPONIVEL">Indisponível</option>
             </select>
 
-            <Link
-              href="/imovel/novo"
-              className="inline-flex items-center justify-center px-6 py-3 bg-black hover:bg-stone-900 text-white font-medium text-sm rounded-xl shadow-lg shadow-black/10 transition-all duration-300 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-            >
-              + Novo Imóvel
-            </Link>
+            {!somenteLeitura && (
+              <Link
+                href="/imovel/novo"
+                className="inline-flex items-center justify-center px-6 py-3 bg-black hover:bg-stone-900 text-white font-medium text-sm rounded-xl shadow-lg shadow-black/10 transition-all duration-300 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+              >
+                + Novo Imóvel
+              </Link>
+            )}
           </div>
         </div>
 
@@ -187,6 +208,19 @@ export default function Imoveis() {
                     </td>
                     <td className="px-6 py-4 text-sm text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {somenteLeitura ? (
+                          imovel.status === 'DISPONIVEL' ? (
+                            <button
+                              onClick={() => handleReservarImovel(imovel)}
+                              className="px-4 py-2 bg-black hover:bg-stone-900 text-white text-xs font-semibold uppercase tracking-wider rounded-lg transition-all duration-200"
+                            >
+                              Reservar
+                            </button>
+                          ) : (
+                            <span className="text-xs text-stone-400 italic">Indisponível para reserva</span>
+                          )
+                        ) : (
+                          <>
                         <Link
                           href={`/imovel/${imovel.id}/editar`}
                           className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold uppercase tracking-wider rounded-lg border border-stone-200 transition-all duration-200"
@@ -213,6 +247,8 @@ export default function Imoveis() {
                         >
                           Excluir
                         </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

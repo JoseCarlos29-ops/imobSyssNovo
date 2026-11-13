@@ -71,6 +71,18 @@ public class ImovelService {
         return request;
     }
 
+    // Reserva (aparta) o imovel: unica acao de escrita permitida para o ROLE_USER
+    public boolean reservar(Long id) {
+
+        Imovel imovelBanco = buscarNaEmpresa(id).orElse(null);
+        if(imovelBanco != null){
+            imovelBanco.reservar();
+            imovelRepository.save(imovelBanco);
+            return true;
+        }
+        return false;
+    }
+
     public List<ImovelResponse> listarTodos() {
 
         var usuarioLogado = getUsuarioLogado();

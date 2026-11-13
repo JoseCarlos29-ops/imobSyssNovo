@@ -49,3 +49,9 @@ export async function salvarImovel(imovel: Imovel): Promise<number> {
     const dadosRetorno = await api.post<number>("/imoveis", imovel);
     return dadosRetorno.data;
 }
+
+// ROLE_USER: unica acao permitida alem de visualizar (reservar/apartar o imovel)
+export async function reservarImovel(id: number): Promise<number> {
+    const dadosRetorno = await api.patch(`/imoveis/${id}/reservar`);
+    return dadosRetorno.status;
+}

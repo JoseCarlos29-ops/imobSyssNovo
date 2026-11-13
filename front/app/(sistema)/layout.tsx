@@ -15,7 +15,7 @@ export default function SistemaLayout({children}){
 
     useEffect(()=>{
         if(usuario == null){
-            router.push("/");
+            router.push("/login");
         }
     }, [usuario, router])
 

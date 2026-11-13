@@ -1,6 +1,8 @@
 'use client'
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 import { Imovel, ImovelFormProps } from "@/app/types/imovel";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -12,6 +14,16 @@ import { TipoImovel } from "@/app/types/tipoImovel";
 export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
 
   const router = useRouter()
+
+  // ROLE_USER nao cadastra nem edita imovel: volta para a listagem
+  const usuarioLogado = useSelector((state: RootState) => state.auth.usuario);
+  const somenteLeitura = usuarioLogado?.role === "ROLE_USER";
+
+  useEffect(() => {
+    if (somenteLeitura) {
+      router.replace("/imovel");
+    }
+  }, [somenteLeitura, router]);
 
   const [imovel, setImovel] = useState<Imovel>(imovelExistente || new Imovel(null, "", "", 0, 0, 0, 0, "", "DISPONIVEL", ""));
 
@@ -111,6 +123,10 @@ export default function ImovelForm({ imovelExistente }: ImovelFormProps) {
       
         ))
       }
+
+  if (somenteLeitura) {
+    return null;
+  }
 
   return (
 
